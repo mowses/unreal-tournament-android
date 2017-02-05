@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8"/>
+	<title>Sensors</title>
+	<script type="text/javascript" src="{{ url_for('static', filename = 'socket.io.min.js') }}"></script>
+	<script type="text/javascript">
+		var events = {
+			ts: 0,
+			motion: {
+				x: null,
+				y: null,
+				z: null
+			},
+			orientation: {
+				pan: null,
+				tilt: null,
+				roll: null
+			}
+		}
+
+		function motion(event) {
+			events.motion = {
+				x: event.accelerationIncludingGravity.x,
+				y: event.accelerationIncludingGravity.y,
+				z: event.accelerationIncludingGravity.z
+			};
+
+			ace.innerHTML = "Accelerometer: <br/>" +
+			"x:" + events.motion.x + "<br/>" +
+			"y:" + events.motion.y + "<br/>" +
+			"z:" + events.motion.z;
+
+			send_commands();
+		}
+
+		function orientation(event) {
+			events.orientation = {
+				pan: event.alpha,  // 0 to 360
+				tilt: event.gamma,  // 0 to 90 0 to -90
+				roll: event.beta
+			};
+
+			mag.innerHTML = "Magnetometer: <br/>" +
+			"pan:" + events.orientation.pan + "<br/>" +
+			"tilt:" + events.orientation.tilt + "<br/>" +
+			"roll:" + events.orientation.roll;
+
+			send_commands()
+		}
+
+		function start_sensors() {
+			ace = document.getElementById("accelerometer");
+			mag = document.getElementById("magnetometer");
+			tsp = document.getElementById("timestamp");
+			
+			if(window.DeviceMotionEvent) {
+				window.addEventListener("devicemotion", motion, false);
+			} else {
+				var status = document.getElementById("status");
+				status.innerHTML = status.innerHTML.replace("is supported", "is not supported");
+			}
+			if (window.DeviceOrientationEvent) {
+				window.addEventListener("deviceorientation", orientation, false);
+			} else {
+				var status = document.getElementById("status");
+				status.innerHTML = status.innerHTML.replace("is supported", "is not supported");
+			}
+		}
+	</script>
+	<script type="text/javascript">
+	var socket;
+	
+	function send_commands() {
+		events.ts += 0.00001;
+		tsp.innerHTML = "Timestamp: <br/>" + events.ts;
+		socket.emit('update data', events);
+	}
+
+	function connect_socket() {
+		socket = io.connect('http://' + document.domain + ':' + location.port);
+		socket.on('connect', function() {
+			start_sensors();
+		});
+	}
+	</script>
+</head>
+<body onload="connect_socket();">
+	<div id="accelerometer"></div>
+	<br/><br/>
+	<div id="magnetometer"></div>
+	<br/><br/>
+	<div id="timestamp"></div>
+	<br/><br/>
+	<div id="status"><a href="http://www.w3.org/TR/orientation-event/" target="_blank">http://www.w3.org/TR/orientation-event/</a> is supported.</div>
+</body>
+</html>
