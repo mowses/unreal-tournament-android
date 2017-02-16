@@ -45,7 +45,7 @@ def absoluteTiltTo(deg):  # deg ranges: 0 to 90, 0 to -90
 
 	diff = abs(currentTilt - deg)
 	direction = 1 if deg - currentTilt >= 0 else -1
-	x = diff / 45
+	x = min(diff / 45, 1)  # limited to 1 because may bug but I dont really know
 	while x >= 1:
 		currentTilt += 45 * direction
 		pyautogui.moveRel(None, -half_height * direction, 0)

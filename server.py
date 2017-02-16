@@ -1,12 +1,13 @@
 import time
-time.sleep(12)
+#time.sleep(12)
+import socket
 import socketio
 import eventlet
 import eventlet.wsgi
 import sys
 from flask import Flask, render_template
-sys.path.append('./mouse/')
-from mouse import mouse
+#sys.path.append('./mouse/')
+#from mouse import mouse
 
 
 sio = socketio.Server()
@@ -14,6 +15,11 @@ app = Flask(__name__)
 last_timestamp = 0
 last_pan = None
 last_tilt = None
+
+# socke UDP
+UDP_IP = "192.168.1.14"
+UDP_PORT = 8000
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 @app.route('/')
 def index():
@@ -35,22 +41,25 @@ def message(sid, data):
 
     ts = data['ts']
     
-    if last_timestamp >= ts:
+    if ts <= last_timestamp:
         return
 
     last_timestamp = ts
     
-    pan = int(data['orientation']['pan'])
-    if pan != last_pan:
-        last_pan = pan
-        pan = mouse.absoluteRotateTo(360-pan)
+    pan = str(float(data['orientation']['pan'])).ljust(20, '0')
+    # if pan != last_pan:
+    #     last_pan = pan
+    #     #pan = mouse.absoluteRotateTo(360-data['orientation']['pan'])
 
-    tilt = int(data['orientation']['tilt'])
-    if tilt != last_tilt:
-        last_tilt = tilt
-        tilt = mouse.absoluteTiltTo(-tilt)
+    tilt = str(float(data['orientation']['tilt'])).ljust(20, '0')
+    # if tilt != last_tilt:
+    #     last_tilt = tilt
+    #    #tilt = mouse.absoluteTiltTo(-data['orientation']['tilt'])
 
-    print('update data', pan, tilt)
+    ts = str(ts).rjust(20, '0')
+
+    sock.sendto(bytes("{0}|{1},{2}".format(ts, pan, tilt), 'utf-8'), (UDP_IP, UDP_PORT))
+    print('update data', ts, pan, tilt)
     
 
 #@sio.on('disconnect', namespace='/body')
