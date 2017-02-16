@@ -5,10 +5,23 @@ import socketio
 import eventlet
 import eventlet.wsgi
 import sys
+import argparse
 from flask import Flask, render_template
 #sys.path.append('./mouse/')
 #from mouse import mouse
 
+parser = argparse.ArgumentParser(description='Listen for data to send to UT99 via UDP')
+parser.add_argument(
+    '-i', '--ip',
+    #action='append',
+    #nargs='+',
+    #const='',
+    default='192.168.1.12',
+    type=str,
+    required=True,
+    help='ip number to send captured data to'
+)   
+args1, unknown = parser.parse_known_args()
 
 sio = socketio.Server()
 app = Flask(__name__)
@@ -16,8 +29,8 @@ last_timestamp = 0
 last_pan = None
 last_tilt = None
 
-# socke UDP
-UDP_IP = "192.168.1.14"
+# socket UDP
+UDP_IP = args1.ip
 UDP_PORT = 8000
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 

@@ -13,7 +13,7 @@ z: Represents the axis perpendicular to the ground
 	<title>Sensors</title>
 	<script type="text/javascript" src="{{ url_for('static', filename = 'socket.io.min.js') }}"></script>
 	<script type="text/javascript">
-	function matrix_vector_multiply(matrix1, vec1) {
+	/*function matrix_vector_multiply(matrix1, vec1) {
 		var vec2 = [];
 		vec2[0] = matrix1[0] * vec1[0];
 		vec2[0] += matrix1[1] * vec1[1];
@@ -67,7 +67,7 @@ z: Represents the axis perpendicular to the ground
 
 	function toRadians (angle) {
 		return angle * (Math.PI / 180);
-	}
+	}*/
 	/*var noSleep = new NoSleep();
 
 	function enableNoSleep() {
@@ -95,7 +95,7 @@ z: Represents the axis perpendicular to the ground
 			}
 		}
 
-		function motion(event) {
+		/*function motion(event) {
 			events.motion = {
 				x: parseFloat(event.accelerationIncludingGravity.x.toFixed(10)),
 				y: parseFloat(event.accelerationIncludingGravity.y.toFixed(10)),
@@ -106,13 +106,13 @@ z: Represents the axis perpendicular to the ground
 			ace.innerHTML = "Accelerometer: <br/>" +
 			"x:" + (events.motion.x) + "<br/>" +
 			"y:" + (events.motion.y) + "<br/>" +
-			"z:" + (events.motion.z) + "<br/>"/* +
+			"z:" + (events.motion.z) + "<br/>"* +
 			"gravity 0:" + gravity[0] + "<br/>" +
 			"gravity 1:" + gravity[1] + "<br/>" +
-			"gravity 2:" + gravity[2] + "<br/>"*/;
+			"gravity 2:" + gravity[2] + "<br/>"*;
 
 			//send_commands();
-		}
+		}*/
 		
 		function orientation(event) {
 			events.orientation = {
@@ -134,12 +134,12 @@ z: Represents the axis perpendicular to the ground
 			mag = document.getElementById("magnetometer");
 			tsp = document.getElementById("timestamp");
 			
-			if(window.DeviceMotionEvent) {
+			/*if(window.DeviceMotionEvent) {
 				window.addEventListener("devicemotion", motion, false);
 			} else {
 				var status = document.getElementById("status");
 				status.innerHTML = status.innerHTML.replace("is supported", "is not supported");
-			}
+			}*/
 			if (window.DeviceOrientationEvent) {
 				window.addEventListener("deviceorientation", orientation, false);
 			} else {

@@ -1,0 +1,2 @@
+[Public]
+Object=(Class=Class,MetaClass=Engine.UdpLink,Name=MutHelloWorldUdp.HelloWorldUdp,Description="Hello World Udp")
