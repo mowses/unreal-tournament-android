@@ -1,2 +1,12 @@
 http://www.samontab.com/web/2014/06/installing-opencv-2-4-9-in-ubuntu-14-04-lts/
 
+
+
+
+LATEST UPDATE: 22 APR 2017
+- HOW TO INSTALL AND RUN ON WINDOWS:
+	- git clone https://github.com/mowses/unreal-tournament-android.git in the same folder where have installed UT99 (not inside UnrealTournament folder);
+	- run winbatch.bat to add the mod files (already included in the project);
+	- plug your MPU6050 sensor with arduino in your PC USB;
+	- run python serial-capture.py -i [machine ip where UT is running] -b 115200 -s COM3 (note: to know your port run the command: python -m serial.tools.list_ports)
+	- start a new match and just add the "HelloWorld" mutator under the mutator list;
