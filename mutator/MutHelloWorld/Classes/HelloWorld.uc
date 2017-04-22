@@ -48,12 +48,13 @@ function Tick(float DeltaTime)
 	if (LocalPlayer == None)
 		return;
 
-	if (UdpComm.ts <= lastTS)
-		return;
+	//if (UdpComm.ts <= lastTS)
+	//	return;
 
 	lastTS = UdpComm.ts;
 	ChangeRotation(-UdpComm.yaw, UdpComm.pitch, 0);
-	//LocalPlayer.ClientMessage("Orientation: "$LocalPlayer.Rotation);
+	LocalPlayer.ClientMessage("curr ts: "$UdpComm.ts);
+	LocalPlayer.ClientMessage("curr orient: "$LocalPlayer.Rotation);
 }
 
 function ChangeRotation(Float Yaw, Float Pitch, Float Roll)
