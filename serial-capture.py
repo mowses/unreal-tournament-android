@@ -57,14 +57,18 @@ arduino.isOpen()
 print('sending some text to start the capture...')
 arduino.write('send some text just to start the capture'.encode('utf-8'))
 
+log = open('log.txt', 'w')
+
 while True:
     try:
         line = arduino.readline()
         if not line:
             continue
         
-        line = line.decode('utf8').strip()
-        cols = line.split('\t')
+        line = line.decode('utf8')
+        log.write(line)
+        cols = line.strip().split('\t')
+
         if cols[0] != 'yp' or len(cols) != 3:
             continue
 
@@ -81,3 +85,4 @@ while True:
 
 print('closing serial...')
 arduino.close()
+log.close()
