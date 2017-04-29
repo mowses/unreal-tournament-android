@@ -31,7 +31,7 @@ parser.add_argument(
     #action='append',
     #nargs='+',
     #const='',
-    default=9600,
+    default=115200,
     type=int,
     required=True,
     help='communication baudrate'
@@ -72,8 +72,8 @@ while True:
         if cols[0] != 'yp' or len(cols) != 3:
             continue
 
-        y = str(float(cols[1])+180).ljust(20, '0')
-        p = str(float(cols[2])*-1).ljust(20, '0')
+        y = str((float(cols[1])+180)*-1).ljust(20, '0')
+        p = str(float(cols[2])).ljust(20, '0')
         i += 1
         ts = str(i).rjust(20, '0')
         

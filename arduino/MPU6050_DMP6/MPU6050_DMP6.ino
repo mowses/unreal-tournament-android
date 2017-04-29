@@ -283,6 +283,9 @@ void loop() {
         // read a packet from FIFO
         mpu.getFIFOBytes(fifoBuffer, packetSize);
         // https://arduino.stackexchange.com/questions/10308/how-to-clear-fifo-buffer-on-mpu6050
+        // To prevent overflow problems, please, go to MPU6050_6Axis_MotionApps20.h and modify that line:
+        // 0x02,   0x16,   0x02,   0x00, **0x01**                // D_0_22 inv_set_fifo_rate
+        // The value in bold is the objective! Change it to 0x03 or 0x04 or 0x05 to reduce the Hz of rate. I am using 0x03 and not getting error values, junk data, or overflows anymore.
         mpu.resetFIFO();
         
         // track FIFO count here in case there is > 1 packet available
@@ -317,6 +320,16 @@ void loop() {
         #ifdef OUTPUT_READABLE_YAWPITCHROLL
             // display Euler angles in degrees
             mpu.dmpGetQuaternion(&q, fifoBuffer);
+            if (q.w + q.x + q.y + q.z == 0) return;  // adicionado esta linha pq senao da bug e para
+            Serial.println("=====");
+            Serial.print("quat\t");
+            Serial.print(q.w);
+            Serial.print("\t");
+            Serial.print(q.x);
+            Serial.print("\t");
+            Serial.print(q.y);
+            Serial.print("\t");
+            Serial.println(q.z);
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
             Serial.println("");
