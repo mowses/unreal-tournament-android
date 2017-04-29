@@ -50,6 +50,7 @@ arduino = serial.Serial(
     baudrate=args1.baudrate,
     timeout=0.1
 )
+OUTPUT_FLOAT_PRECISION = 24
 
 print('waiting...')
 time.sleep(5)
@@ -57,32 +58,41 @@ arduino.isOpen()
 print('sending some text to start the capture...')
 arduino.write('send some text just to start the capture'.encode('utf-8'))
 
-log = open('log.txt', 'w')
+log_serial = open('log_serial.txt', 'w')
+log_udp = open('log_udp.txt', 'w')
 
 while True:
     try:
         line = arduino.readline()
         if not line:
             continue
-        
-        line = line.decode('utf8')
-        log.write(line)
-        cols = line.strip().split('\t')
 
-        if cols[0] != 'yp' or len(cols) != 3:
+        i += 1
+        ts = str(i).rjust(OUTPUT_FLOAT_PRECISION, '0')
+        line = line.strip().decode('utf8')
+        cols = line.split('\t')
+        
+        # log to serial file
+        log_serial.write("{0}:{1}{2}".format(ts, line, "\n"))
+
+        if cols[0] != 'ypr' or len(cols) != 4:
             continue
 
-        y = str((float(cols[1])+180)*-1).ljust(20, '0')
-        p = str(float(cols[2])).ljust(20, '0')
-        i += 1
-        ts = str(i).rjust(20, '0')
+        y = str((float(cols[1])+180)*-1).ljust(OUTPUT_FLOAT_PRECISION, '0')
+        p = str(float(cols[2])).ljust(OUTPUT_FLOAT_PRECISION, '0')
         
-        sock.sendto(("{0}|{1},{2}".format(ts, y, p).encode('utf-8')), (UDP_IP, UDP_PORT))
-        print (ts, y, p)
+        sent_udp = "{0}:{1},{2}".format(ts, y, p)
+        sock.sendto(sent_udp.encode('utf-8'), (UDP_IP, UDP_PORT))
+
+        # log to udp file
+        log_udp.write("{0}{1}".format(sent_udp, "\n"))
+        print (sent_udp)
+
     except:
         pass
 
 
 print('closing serial...')
 arduino.close()
-log.close()
+log_serial.close()
+log_udp.close()

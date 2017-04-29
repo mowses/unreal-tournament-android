@@ -36,9 +36,9 @@ function InitUdpLinkTracker()
 event ReceivedText (IpAddr Addr, string Text)
 {
 	// we have just received a string !
-	ts = Int(Mid(Text, 0, 20));
-	yaw = Float(Mid(Text, 21, 20));
-	pitch = Float(Mid(Text, 42, 20));
+	ts = Int(Mid(Text, 0, 24));
+	yaw = Float(Mid(Text, 25, 24));
+	pitch = Float(Mid(Text, 50, 24));
 
 	//log("udp: Read string: "$Text$" ts : "$ts$" yaw:"$yaw$"-pitch:"$pitch);
 }
