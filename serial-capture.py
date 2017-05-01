@@ -1,4 +1,6 @@
+#!/usr/bin/env python
 # list ports: python -m serial.tools.list_ports
+import signal
 import serial
 import time
 import socket
@@ -38,7 +40,12 @@ parser.add_argument(
 )
 args1, unknown = parser.parse_known_args()
 
-i = 0
+def exit_application(signal, frame):
+    print('You pressed Ctrl+C!')
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, exit_application)
+print('Press Ctrl+C to exit')
 
 # socket UDP
 UDP_IP = args1.ip
@@ -61,15 +68,19 @@ arduino.write('send some text just to start the capture'.encode('utf-8'))
 log_serial = open('log_serial.txt', 'w')
 log_udp = open('log_udp.txt', 'w')
 
+i = 0
 while True:
     try:
+        if not arduino.inWaiting():  #if incoming bytes are waiting to be read from the serial input buffer
+            continue
+
         line = arduino.readline()
         if not line:
             continue
 
         i += 1
         ts = str(i).rjust(OUTPUT_FLOAT_PRECISION, '0')
-        line = line.strip().decode('utf8')
+        line = line.decode('ascii').strip()
         cols = line.split('\t')
         
         # log to serial file
@@ -82,14 +93,14 @@ while True:
         p = str(float(cols[2])).ljust(OUTPUT_FLOAT_PRECISION, '0')
         
         sent_udp = "{0}:{1},{2}".format(ts, y, p)
-        sock.sendto(sent_udp.encode('utf-8'), (UDP_IP, UDP_PORT))
+        sock.sendto(sent_udp.encode('ascii'), (UDP_IP, UDP_PORT))
 
         # log to udp file
         log_udp.write("{0}{1}".format(sent_udp, "\n"))
         print (sent_udp)
 
-    except:
-        pass
+    except Exception as e:
+        print(str(e))
 
 
 print('closing serial...')
