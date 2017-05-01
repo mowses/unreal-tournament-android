@@ -6,11 +6,13 @@
 
 MPU6050 mpu;
 
-#define OUTPUT_READABLE_QUATERNION
+//#define OUTPUT_READABLE_QUATERNION
 //#define OUTPUT_READABLE_EULER
 #define OUTPUT_READABLE_YAWPITCHROLL
 //#define OUTPUT_READABLE_REALACCEL
 //#define OUTPUT_READABLE_WORLDACCEL
+//#define OUTPUT_TEAPOT
+
 #define OUTPUT_FLOAT_PRECISION 24
 #define INTERRUPT_PIN 2  // use pin 2 on Arduino Uno & most boards
 #define LED_PIN 13 // (Arduino is 13, Teensy is 11, Teensy++ is 6)
@@ -200,10 +202,39 @@ void loop() {
         #endif
 
         #ifdef OUTPUT_READABLE_YAWPITCHROLL
+            int a = 0;
+            Serial.println("fifoBuffer:");
+            for(a=0;a<=64;a++) {
+                Serial.println(fifoBuffer[a]);
+            }
+            Serial.println("end fifoBuffer:");
             // display Euler angles in degrees
             mpu.dmpGetQuaternion(&q, fifoBuffer);
+            Serial.print("quat\t");
+            Serial.print(q.w, OUTPUT_FLOAT_PRECISION);
+            Serial.print("\t");
+            Serial.print(q.x, OUTPUT_FLOAT_PRECISION);
+            Serial.print("\t");
+            Serial.print(q.y, OUTPUT_FLOAT_PRECISION);
+            Serial.print("\t");
+            Serial.println(q.z, OUTPUT_FLOAT_PRECISION);
+            
             mpu.dmpGetGravity(&gravity, &q);
+            Serial.print("gravity\t");
+            Serial.print(gravity.x, OUTPUT_FLOAT_PRECISION);
+            Serial.print("\t");
+            Serial.print(gravity.y, OUTPUT_FLOAT_PRECISION);
+            Serial.print("\t");
+            Serial.println(gravity.z, OUTPUT_FLOAT_PRECISION);
+
             mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+            Serial.print("ypr original\t");
+            Serial.print(ypr[0], OUTPUT_FLOAT_PRECISION);
+            Serial.print("\t");
+            Serial.print(ypr[1], OUTPUT_FLOAT_PRECISION);
+            Serial.print("\t");
+            Serial.println(ypr[2], OUTPUT_FLOAT_PRECISION);
+
             Serial.print("ypr\t");
             Serial.print(ypr[0] * pi_m, OUTPUT_FLOAT_PRECISION);
             Serial.print("\t");

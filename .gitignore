@@ -1,3 +1,2 @@
 *.pyc
-log_serial.txt
-log_udp.txt
+logs/

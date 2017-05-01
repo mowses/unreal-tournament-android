@@ -65,8 +65,9 @@ arduino.isOpen()
 print('sending some text to start the capture...')
 arduino.write('send some text just to start the capture'.encode('utf-8'))
 
-log_serial = open('log_serial.txt', 'w')
-log_udp = open('log_udp.txt', 'w')
+log_serial = open('./logs/log_serial.txt', 'w')
+log_udp = open('./logs/log_udp.txt', 'w')
+log_error = open('./logs/log_error.txt', 'w')
 
 i = 0
 while True:
@@ -84,7 +85,7 @@ while True:
         cols = line.split('\t')
         
         # log to serial file
-        log_serial.write("{0}:{1}{2}".format(ts, line, "\n"))
+        log_serial.write("{0}:{1}\n".format(ts, line))
 
         if cols[0] != 'ypr' or len(cols) != 4:
             continue
@@ -100,10 +101,13 @@ while True:
         print (sent_udp)
 
     except Exception as e:
-        print(str(e))
+        err = str(e)
+        log_error.write("{0}:{1}\n".format(ts, err))
+        print(err)
 
 
 print('closing serial...')
 arduino.close()
 log_serial.close()
 log_udp.close()
+log_error.close()
