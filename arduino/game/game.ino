@@ -17,6 +17,7 @@ MPU6050 mpu;
 #define INTERRUPT_PIN 2  // use pin 2 on Arduino Uno & most boards
 #define LED_PIN 13 // (Arduino is 13, Teensy is 11, Teensy++ is 6)
 #define BAUDRATE 115200  // baudrate value
+#define BUTTON_3_PIN 3
 
 bool debugMode = false;  // DEBUG MODE
 bool blinkState = false;
@@ -41,6 +42,10 @@ uint8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\
 
 String inputString = "";    // a string to hold incoming data
 
+// button states
+int button3CurrentState = 0;
+int button3LastState = button3CurrentState;
+
 // ================================================================
 // ===                      INITIAL SETUP                       ===
 // ================================================================
@@ -53,6 +58,9 @@ void setup() {
     #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
         Fastwire::setup(400, true);
     #endif
+
+    // initialize push buttons
+    pinMode(BUTTON_3_PIN, INPUT);
 
     Serial.begin(BAUDRATE);
     while (!Serial);
@@ -116,6 +124,15 @@ void setup() {
 // ================================================================
 
 void loop() {
+
+    // button 3 states
+    button3CurrentState = (digitalRead(BUTTON_3_PIN) == HIGH ? 1 : 0);
+    if (button3CurrentState != button3LastState) {
+        Serial.print(F("BUTTON 3\t"));
+        Serial.println(button3CurrentState);
+    }
+    button3LastState = button3CurrentState;
+    // end button 3 states
 
     // if programming failed, don't try to do anything
     if (!dmpReady) return;

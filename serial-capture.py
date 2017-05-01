@@ -6,6 +6,7 @@ import time
 import socket
 import sys
 import argparse
+import pyautogui
 
 parser = argparse.ArgumentParser(description='Listen for data to send to UT99 via UDP')
 parser.add_argument(
@@ -94,18 +95,28 @@ while True:
         # log to serial file
         log_serial.write("{0}:{1}\n".format(ts, line))
 
-        if cols[0] != 'ypr' or len(cols) != 4:
+        if cols[0] == 'ypr' and len(cols) == 4:
+            y = str((float(cols[1])+180)*-1).ljust(OUTPUT_FLOAT_PRECISION, '0')
+            p = str(float(cols[2])).ljust(OUTPUT_FLOAT_PRECISION, '0')
+            
+            sent_udp = "{0}:{1},{2}".format(ts, y, p)
+            sock.sendto(sent_udp.encode('ascii'), (UDP_IP, UDP_PORT))
+
+            # log to udp file
+            log_udp.write("{0}{1}".format(sent_udp, "\n"))
+            print (sent_udp)
             continue
 
-        y = str((float(cols[1])+180)*-1).ljust(OUTPUT_FLOAT_PRECISION, '0')
-        p = str(float(cols[2])).ljust(OUTPUT_FLOAT_PRECISION, '0')
-        
-        sent_udp = "{0}:{1},{2}".format(ts, y, p)
-        sock.sendto(sent_udp.encode('ascii'), (UDP_IP, UDP_PORT))
+        # check for mouse clicks
+        if cols[0] == 'BUTTON 3':
+            if (cols[1] == '1'):
+                pyautogui.mouseDown(button='left')
+            else:
+                pyautogui.mouseUp(button='left')
+            continue
 
-        # log to udp file
-        log_udp.write("{0}{1}".format(sent_udp, "\n"))
-        print (sent_udp)
+
+        
 
     except Exception as e:
         err = str(e)
