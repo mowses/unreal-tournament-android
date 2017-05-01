@@ -18,6 +18,7 @@ MPU6050 mpu;
 #define LED_PIN 13 // (Arduino is 13, Teensy is 11, Teensy++ is 6)
 #define BAUDRATE 115200  // baudrate value
 
+bool debugMode = false;  // DEBUG MODE
 bool blinkState = false;
 // MPU control/status vars
 bool dmpReady = false;  // set true if DMP init was successful
@@ -36,18 +37,9 @@ VectorFloat gravity;    // [x, y, z]            gravity vector
 float euler[3];         // [psi, theta, phi]    Euler angle container
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 float pi_m = 180/M_PI;
-
-// packet structure for InvenSense teapot demo
 uint8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\n' };
 
-// ================================================================
-// ===               INTERRUPT DETECTION ROUTINE                ===
-// ================================================================
-
-volatile bool mpuInterrupt = false;     // indicates whether MPU interrupt pin has gone high
-void dmpDataReady() {
-    mpuInterrupt = true;
-}
+String inputString = "";    // a string to hold incoming data
 
 // ================================================================
 // ===                      INITIAL SETUP                       ===
@@ -63,7 +55,9 @@ void setup() {
     #endif
 
     Serial.begin(BAUDRATE);
-    while (!Serial); // wait for Leonardo enumeration, others continue immediately
+    while (!Serial);
+
+    inputString.reserve(200);  // reserve X bytes for the inputString
 
     // initialize device
     Serial.println(F("Initializing I2C devices..."));
@@ -95,14 +89,10 @@ void setup() {
         // turn on the DMP, now that it's ready
         Serial.println(F("Enabling DMP..."));
         mpu.setDMPEnabled(true);
-
-        // enable Arduino interrupt detection
-        Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
-        //attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), dmpDataReady, RISING);
         mpuIntStatus = mpu.getIntStatus();
 
         // set our DMP Ready flag so the main loop() function knows it's okay to use it
-        Serial.println(F("DMP ready! Waiting for first interrupt..."));
+        Serial.println(F("DMP ready!"));
         dmpReady = true;
 
         // get expected DMP packet size for later comparison
@@ -130,23 +120,6 @@ void loop() {
     // if programming failed, don't try to do anything
     if (!dmpReady) return;
 
-    // wait for MPU interrupt or extra packet(s) available
-    while (!mpuInterrupt && fifoCount < packetSize) {
-      break;
-        // other program behavior stuff here
-        // .
-        // .
-        // .
-        // if you are really paranoid you can frequently test in between other
-        // stuff to see if mpuInterrupt is true, and if so, "break;" from the
-        // while() loop to immediately process the MPU data
-        // .
-        // .
-        // .
-    }
-
-    // reset interrupt flag and get INT_STATUS byte
-    mpuInterrupt = false;
     mpuIntStatus = mpu.getIntStatus();
 
     // get current FIFO count
@@ -170,13 +143,11 @@ void loop() {
         // To prevent overflow problems, please, go to MPU6050_6Axis_MotionApps20.h and modify that line:
         // 0x02,   0x16,   0x02,   0x00, **0x01**                // D_0_22 inv_set_fifo_rate
         // The value in bold is the objective! Change it to 0x03 or 0x04 or 0x05 to reduce the Hz of rate. I am using 0x03 and not getting error values, junk data, or overflows anymore.
-        mpu.resetFIFO();
+        //mpu.resetFIFO();
         
-        // track FIFO count here in case there is > 1 packet available
-        // (this lets us immediately read more without waiting for an interrupt)
         fifoCount -= packetSize;
 
-        #ifdef OUTPUT_READABLE_QUATERNION
+        /*#ifdef OUTPUT_READABLE_QUATERNION
             // display quaternion values in easy matrix form: w x y z
             mpu.dmpGetQuaternion(&q, fifoBuffer);
             Serial.print("quat\t");
@@ -199,48 +170,6 @@ void loop() {
             Serial.print(euler[1] * pi_m, OUTPUT_FLOAT_PRECISION);
             Serial.print("\t");
             Serial.println(euler[2] * pi_m, OUTPUT_FLOAT_PRECISION);
-        #endif
-
-        #ifdef OUTPUT_READABLE_YAWPITCHROLL
-            int a = 0;
-            Serial.println("fifoBuffer:");
-            for(a=0;a<=64;a++) {
-                Serial.println(fifoBuffer[a]);
-            }
-            Serial.println("end fifoBuffer:");
-            // display Euler angles in degrees
-            mpu.dmpGetQuaternion(&q, fifoBuffer);
-            Serial.print("quat\t");
-            Serial.print(q.w, OUTPUT_FLOAT_PRECISION);
-            Serial.print("\t");
-            Serial.print(q.x, OUTPUT_FLOAT_PRECISION);
-            Serial.print("\t");
-            Serial.print(q.y, OUTPUT_FLOAT_PRECISION);
-            Serial.print("\t");
-            Serial.println(q.z, OUTPUT_FLOAT_PRECISION);
-            
-            mpu.dmpGetGravity(&gravity, &q);
-            Serial.print("gravity\t");
-            Serial.print(gravity.x, OUTPUT_FLOAT_PRECISION);
-            Serial.print("\t");
-            Serial.print(gravity.y, OUTPUT_FLOAT_PRECISION);
-            Serial.print("\t");
-            Serial.println(gravity.z, OUTPUT_FLOAT_PRECISION);
-
-            mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-            Serial.print("ypr original\t");
-            Serial.print(ypr[0], OUTPUT_FLOAT_PRECISION);
-            Serial.print("\t");
-            Serial.print(ypr[1], OUTPUT_FLOAT_PRECISION);
-            Serial.print("\t");
-            Serial.println(ypr[2], OUTPUT_FLOAT_PRECISION);
-
-            Serial.print("ypr\t");
-            Serial.print(ypr[0] * pi_m, OUTPUT_FLOAT_PRECISION);
-            Serial.print("\t");
-            Serial.print(ypr[1] * pi_m, OUTPUT_FLOAT_PRECISION);
-            Serial.print("\t");
-            Serial.println(ypr[2] * pi_m, OUTPUT_FLOAT_PRECISION);
         #endif
 
         #ifdef OUTPUT_READABLE_REALACCEL
@@ -285,6 +214,10 @@ void loop() {
             teapotPacket[9] = fifoBuffer[13];
             Serial.write(teapotPacket, 14);
             teapotPacket[11]++; // packetCount, loops at 0xFF on purpose
+        #endif*/
+
+        #ifdef OUTPUT_READABLE_YAWPITCHROLL
+            output_readable_yawpitchroll();
         #endif
         
         // blink LED to indicate activity
@@ -297,3 +230,83 @@ void loop() {
 
 
 
+void output_readable_yawpitchroll() {
+    if (debugMode) {
+        int a = 0;
+        Serial.println("fifoBuffer:");
+        for(a=0;a<=64;a++) {
+            Serial.println(fifoBuffer[a]);
+        }
+        Serial.println("end fifoBuffer:");
+    }
+    
+    // display Euler angles in degrees
+    mpu.dmpGetQuaternion(&q, fifoBuffer);
+    if (debugMode) {
+        Serial.print("quat\t");
+        Serial.print(q.w, OUTPUT_FLOAT_PRECISION);
+        Serial.print("\t");
+        Serial.print(q.x, OUTPUT_FLOAT_PRECISION);
+        Serial.print("\t");
+        Serial.print(q.y, OUTPUT_FLOAT_PRECISION);
+        Serial.print("\t");
+        Serial.println(q.z, OUTPUT_FLOAT_PRECISION);
+    }
+    
+    mpu.dmpGetGravity(&gravity, &q);
+    if (debugMode) {
+        Serial.print("gravity\t");
+        Serial.print(gravity.x, OUTPUT_FLOAT_PRECISION);
+        Serial.print("\t");
+        Serial.print(gravity.y, OUTPUT_FLOAT_PRECISION);
+        Serial.print("\t");
+        Serial.println(gravity.z, OUTPUT_FLOAT_PRECISION);
+    }
+
+    mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+    if (debugMode) {
+        Serial.print("ypr original\t");
+        Serial.print(ypr[0], OUTPUT_FLOAT_PRECISION);
+        Serial.print("\t");
+        Serial.print(ypr[1], OUTPUT_FLOAT_PRECISION);
+        Serial.print("\t");
+        Serial.println(ypr[2], OUTPUT_FLOAT_PRECISION);
+    }
+
+    // data to send
+    Serial.print("ypr\t");
+    Serial.print(ypr[0] * pi_m, OUTPUT_FLOAT_PRECISION);
+    Serial.print("\t");
+    Serial.print(ypr[1] * pi_m, OUTPUT_FLOAT_PRECISION);
+    Serial.print("\t");
+    Serial.println(ypr[2] * pi_m, OUTPUT_FLOAT_PRECISION);
+}
+
+
+void serialEvent() {
+    while(Serial.available()) {
+        // get the new byte:
+        char inChar = char(Serial.read());
+
+        if (inChar != '\n') {
+            inputString += inChar;
+            continue;
+        }
+
+        Serial.println("> " + inputString);
+
+        // carriage return
+        if (inputString == "DEBUG ON") {
+            debugMode = true;
+            Serial.println("DEBUG MODE IS: ON");
+
+        } else if (inputString == "DEBUG OFF") {
+            debugMode = false;
+            Serial.println("DEBUG MODE IS: OFF");
+        } else {
+            Serial.println("INVALID COMMAND");
+        }
+        
+        inputString = "";
+    }
+}

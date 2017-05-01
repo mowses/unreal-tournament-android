@@ -38,6 +38,11 @@ parser.add_argument(
     required=True,
     help='communication baudrate'
 )
+parser.add_argument(
+    '-d', '--debug',
+    action='store_true',
+    help='log all usefull values from arduino to log file'
+)
 args1, unknown = parser.parse_known_args()
 
 def exit_application(signal, frame):
@@ -60,10 +65,12 @@ arduino = serial.Serial(
 OUTPUT_FLOAT_PRECISION = 24
 
 print('waiting...')
-time.sleep(5)
 arduino.isOpen()
+while (not arduino.inWaiting()):
+    pass
+
 print('sending some text to start the capture...')
-arduino.write('send some text just to start the capture'.encode('utf-8'))
+arduino.write((b'\nDEBUG ON\n' if args1.debug else b'\nDEBUG OFF\n'))
 
 log_serial = open('./logs/log_serial.txt', 'w')
 log_udp = open('./logs/log_udp.txt', 'w')
