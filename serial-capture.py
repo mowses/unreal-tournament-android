@@ -8,6 +8,7 @@ import sys
 import argparse
 import pyautogui
 
+pyautogui.PAUSE = 0
 parser = argparse.ArgumentParser(description='Listen for data to send to UT99 via UDP')
 parser.add_argument(
     '-i', '--ip',
@@ -113,6 +114,8 @@ while True:
                 pyautogui.mouseDown(button='left')
             else:
                 pyautogui.mouseUp(button='left')
+
+            print('{0} {1}'.format(cols[0], cols[1]))
             continue
 
 
