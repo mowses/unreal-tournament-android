@@ -156,11 +156,16 @@ void loop() {
         // read a packet from FIFO
         mpu.getFIFOBytes(fifoBuffer, packetSize);
         // https://arduino.stackexchange.com/questions/10308/how-to-clear-fifo-buffer-on-mpu6050
-        // *** no projeto final, nao mexi no arquivo MPU6050_6Axis_MotionApps20.h ***, escrevi comentario abaixo so para constar a opcao
         // To prevent overflow problems, please, go to MPU6050_6Axis_MotionApps20.h and modify that line:
         // 0x02,   0x16,   0x02,   0x00, **0x01**                // D_0_22 inv_set_fifo_rate
         // The value in bold is the objective! Change it to 0x03 or 0x04 or 0x05 to reduce the Hz of rate. I am using 0x03 and not getting error values, junk data, or overflows anymore.
-        //mpu.resetFIFO();
+
+        // This very last 0x01 WAS a 0x09, which drops the FIFO rate down to 20 Hz. 0x07 is 25 Hz,
+        // 0x01 is 100Hz. Going faster than 100Hz (0x00=200Hz) tends to result in very noisy data.
+        // DMP output frequency is calculated easily using this equation: (200Hz / (1 + value))
+
+        // It is important to make sure the host processor can keep up with reading and processing
+        // the FIFO output at the desired rate. Handling FIFO overflow cleanly is also a good idea.
         
         fifoCount -= packetSize;
 
@@ -248,14 +253,14 @@ void loop() {
 
 
 void output_readable_yawpitchroll() {
-    if (debugMode) {
+    /*if (debugMode) {
         int a = 0;
         Serial.println("fifoBuffer:");
         for(a=0;a<=64;a++) {
             Serial.println(fifoBuffer[a]);
         }
         Serial.println("end fifoBuffer:");
-    }
+    }*/
     
     // display Euler angles in degrees
     mpu.dmpGetQuaternion(&q, fifoBuffer);
@@ -281,14 +286,14 @@ void output_readable_yawpitchroll() {
     }
 
     mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-    if (debugMode) {
+    /*if (debugMode) {
         Serial.print("ypr original\t");
         Serial.print(ypr[0], OUTPUT_FLOAT_PRECISION);
         Serial.print("\t");
         Serial.print(ypr[1], OUTPUT_FLOAT_PRECISION);
         Serial.print("\t");
         Serial.println(ypr[2], OUTPUT_FLOAT_PRECISION);
-    }
+    }*/
 
     // data to send
     Serial.print("ypr\t");

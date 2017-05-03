@@ -139,7 +139,7 @@ def initSerial(arduino):
     while (not arduino.isOpen() or not arduino.inWaiting()):
         pass
 
-    arduino.flushInput()  # Flush input buffer, discarding all its contents
+    # arduino.flushInput()  # Flush input buffer, discarding all its contents
     print('sending some text to start the capture...')
     command = (b'\nDEBUG ON\n' if args1.debug else b'\nDEBUG OFF\n')
     arduino.write(bytes(command))
