@@ -49,6 +49,7 @@ args1, unknown = parser.parse_known_args()
 
 def exit_application(signal, frame):
     print('You pressed Ctrl+C!')
+    arduino.close()
     sys.exit(0)
 
 signal.signal(signal.SIGINT, exit_application)
@@ -66,13 +67,20 @@ arduino = serial.Serial(
 )
 OUTPUT_FLOAT_PRECISION = 24
 
+if arduino.isOpen():
+    arduino.close()
+
+arduino.open()
+
 print('waiting...')
-arduino.isOpen()
-while (not arduino.inWaiting()):
+time.sleep(5)
+while (not arduino.isOpen() or not arduino.inWaiting()):
     pass
 
+arduino.flushInput()
 print('sending some text to start the capture...')
-arduino.write((b'\nDEBUG ON\n' if args1.debug else b'\nDEBUG OFF\n'))
+command = (b'\nDEBUG ON\n' if args1.debug else b'\nDEBUG OFF\n')
+arduino.write(bytes(command))
 
 log_serial = open('./logs/log_serial.txt', 'w')
 log_udp = open('./logs/log_udp.txt', 'w')

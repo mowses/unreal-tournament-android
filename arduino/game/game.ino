@@ -299,7 +299,6 @@ void output_readable_yawpitchroll() {
     Serial.println(ypr[2] * pi_m, OUTPUT_FLOAT_PRECISION);
 }
 
-
 void serialEvent() {
     while(Serial.available()) {
         // get the new byte:
