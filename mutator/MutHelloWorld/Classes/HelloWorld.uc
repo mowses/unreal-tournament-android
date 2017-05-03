@@ -29,6 +29,7 @@ function PostBeginPlay()
 	if (AlreadyRunPostBeginPlay)
 		return;
 
+	Log("HelloWorld.uc mod loaded");
 	AlreadyRunPostBeginPlay = True;
 	RuuAngle1 = 65536 / 360;  // Since 65536 = 0 = 360, half of that equals 180, right?
 
@@ -48,13 +49,15 @@ function Tick(float DeltaTime)
 	if (LocalPlayer == None)
 		return;
 
-	//if (UdpComm.ts <= lastTS)
-	//	return;
+	if (UdpComm.ts <= lastTS) {
+		//LocalPlayer.ClientMessage("Late packed received: "$UdpComm.ts);
+		return;
+	}
 
 	lastTS = UdpComm.ts;
-	ChangeRotation(-UdpComm.yaw, UdpComm.pitch, 0);
-	LocalPlayer.ClientMessage("curr ts: "$UdpComm.ts);
-	LocalPlayer.ClientMessage("curr orient: "$LocalPlayer.Rotation);
+	ChangeRotation(UdpComm.yaw, UdpComm.pitch, 0);
+	//LocalPlayer.ClientMessage("curr ts: "$UdpComm.ts);
+	//LocalPlayer.ClientMessage("curr orient: "$LocalPlayer.Rotation);
 }
 
 function ChangeRotation(Float Yaw, Float Pitch, Float Roll)

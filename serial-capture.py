@@ -40,7 +40,7 @@ def startCapture(arduino, udp):
                 log_serial.write("{0}:{1}\n".format(ts, line))
 
             if cols[0] == 'ypr' and len(cols) == 4:
-                y = str((float(cols[1])+180)*-1).ljust(OUTPUT_FLOAT_PRECISION, '0')
+                y = str((float(cols[1])+180)).ljust(OUTPUT_FLOAT_PRECISION, '0')
                 p = str(float(cols[2])).ljust(OUTPUT_FLOAT_PRECISION, '0')
                 
                 sent_udp = "{0}:{1},{2}".format(ts, y, p)

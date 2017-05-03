@@ -1,3 +1,7 @@
+:: dont forget to add in your UnrealTournament/System/UnrealTournament.ini the following lines:
+:: EditPackages=MutHelloWorldUdp
+:: EditPackages=MutHelloWorld
+:: after the last EditPackages= line
 break>../UnrealTournament/System/UnrealTournament.log
 del ..\UnrealTournament\System\MutHelloWorld.u
 del ..\UnrealTournament\System\MutHelloWorldUdp.u
