@@ -19,7 +19,7 @@ MPU6050 mpu;
 #define BAUDRATE 115200  // baudrate value
 #define BUTTON_3_PIN 3
 
-bool debugMode = false;  // DEBUG MODE
+// bool debugMode = false;  // DEBUG MODE
 bool blinkState = false;
 // MPU control/status vars
 bool dmpReady = false;  // set true if DMP init was successful
@@ -264,7 +264,7 @@ void output_readable_yawpitchroll() {
     
     // display Euler angles in degrees
     mpu.dmpGetQuaternion(&q, fifoBuffer);
-    if (debugMode) {
+    /*if (debugMode) {
         Serial.print("quat\t");
         Serial.print(q.w, OUTPUT_FLOAT_PRECISION);
         Serial.print("\t");
@@ -273,17 +273,17 @@ void output_readable_yawpitchroll() {
         Serial.print(q.y, OUTPUT_FLOAT_PRECISION);
         Serial.print("\t");
         Serial.println(q.z, OUTPUT_FLOAT_PRECISION);
-    }
+    }*/
     
     mpu.dmpGetGravity(&gravity, &q);
-    if (debugMode) {
+    /*if (debugMode) {
         Serial.print("gravity\t");
         Serial.print(gravity.x, OUTPUT_FLOAT_PRECISION);
         Serial.print("\t");
         Serial.print(gravity.y, OUTPUT_FLOAT_PRECISION);
         Serial.print("\t");
         Serial.println(gravity.z, OUTPUT_FLOAT_PRECISION);
-    }
+    }*/
 
     mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
     /*if (debugMode) {
@@ -304,7 +304,7 @@ void output_readable_yawpitchroll() {
     Serial.println(ypr[2] * pi_m, OUTPUT_FLOAT_PRECISION);
 }
 
-void serialEvent() {
+/*void serialEvent() {
     while(Serial.available()) {
         // get the new byte:
         char inChar = char(Serial.read());
@@ -330,4 +330,4 @@ void serialEvent() {
         
         inputString = "";
     }
-}
+}*/
