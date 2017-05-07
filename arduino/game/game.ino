@@ -4,8 +4,6 @@
     #include "Wire.h"
 #endif
 
-MPU6050 mpu;
-
 //#define OUTPUT_READABLE_QUATERNION
 //#define OUTPUT_READABLE_EULER
 #define OUTPUT_READABLE_YAWPITCHROLL
@@ -18,17 +16,18 @@ MPU6050 mpu;
 #define LED_PIN 13 // (Arduino is 13, Teensy is 11, Teensy++ is 6)
 #define BAUDRATE 115200  // baudrate value
 #define BUTTON_3_PIN 3
+#define TOTAL_MPU6050 2  // number of MPU6050 sensors connected to arduino
 
 // bool debugMode = false;  // DEBUG MODE
 bool blinkState = false;
-// MPU control/status vars
-bool dmpReady = false;  // set true if DMP init was successful
-uint8_t mpuIntStatus;   // holds actual interrupt status byte from MPU
-uint8_t devStatus;      // return status after each device operation (0 = success, !0 = error)
-uint16_t packetSize;    // expected DMP packet size (default is 42 bytes)
-uint16_t fifoCount;     // count of all bytes currently in FIFO
-uint8_t fifoBuffer[64]; // FIFO storage buffer
 
+// MPU control/status vars
+MPU6050 mpus[TOTAL_MPU6050-1];
+bool dmpReady[TOTAL_MPU6050-1];          // set true if DMP init was successful
+uint16_t packetSize[TOTAL_MPU6050-1];    // expected DMP packet size (default is 42 bytes)
+uint8_t fifoBuffer[64]; // FIFO storage buffer
+uint16_t fifoCount;     // count of all bytes currently in FIFO
+uint8_t mpuIntStatus;   // holds actual interrupt status byte from MPU
 // orientation/motion vars
 Quaternion q;           // [w, x, y, z]         quaternion container
 VectorInt16 aa;         // [x, y, z]            accel sensor measurements
@@ -40,7 +39,7 @@ float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gra
 float pi_m = 180/M_PI;
 uint8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\n' };
 
-String inputString = "";    // a string to hold incoming data
+//String inputString = "";    // a string to hold incoming data
 
 // button states
 int button3CurrentState = 0;
@@ -65,16 +64,110 @@ void setup() {
     Serial.begin(BAUDRATE);
     while (!Serial);
 
-    inputString.reserve(200);  // reserve X bytes for the inputString
-
     // initialize device
     Serial.println(F("Initializing I2C devices..."));
-    mpu.initialize();
     pinMode(INTERRUPT_PIN, INPUT);
+
+    //inputString.reserve(200);  // reserve X bytes for the inputString
+    initializeMPU(0);
+
+    // configure LED for output
+    pinMode(LED_PIN, OUTPUT);
+}
+
+// ================================================================
+// ===                    MAIN PROGRAM LOOP                     ===
+// ================================================================
+
+void loop() {
+
+    // button 3 states
+    button3CurrentState = (digitalRead(BUTTON_3_PIN) == HIGH ? 1 : 0);
+    if (button3CurrentState != button3LastState) {
+        Serial.print(F("BUTTON 3\t"));
+        Serial.println(button3CurrentState);
+    }
+    button3LastState = button3CurrentState;
+    // end button 3 states
+
+    loopMPU(0);
+
+    // blink LED to indicate activity
+    blinkState = !blinkState;
+    digitalWrite(LED_PIN, blinkState);
+}
+
+
+
+// ================================================================
+// ===                  APPLICATION FUNCTIONS                   ===
+// ================================================================
+
+void output_readable_yawpitchroll(MPU6050 mpu) {
+    /*if (debugMode) {
+        int a = 0;
+        Serial.println("fifoBuffer:");
+        for(a=0;a<=64;a++) {
+            Serial.println(fifoBuffer[a]);
+        }
+        Serial.println("end fifoBuffer:");
+    }*/
+    
+    // display Euler angles in degrees
+    mpu.dmpGetQuaternion(&q, fifoBuffer);
+    /*if (debugMode) {
+        Serial.print("quat\t");
+        Serial.print(q.w, OUTPUT_FLOAT_PRECISION);
+        Serial.print("\t");
+        Serial.print(q.x, OUTPUT_FLOAT_PRECISION);
+        Serial.print("\t");
+        Serial.print(q.y, OUTPUT_FLOAT_PRECISION);
+        Serial.print("\t");
+        Serial.println(q.z, OUTPUT_FLOAT_PRECISION);
+    }*/
+    
+    mpu.dmpGetGravity(&gravity, &q);
+    /*if (debugMode) {
+        Serial.print("gravity\t");
+        Serial.print(gravity.x, OUTPUT_FLOAT_PRECISION);
+        Serial.print("\t");
+        Serial.print(gravity.y, OUTPUT_FLOAT_PRECISION);
+        Serial.print("\t");
+        Serial.println(gravity.z, OUTPUT_FLOAT_PRECISION);
+    }*/
+
+    mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+    /*if (debugMode) {
+        Serial.print("ypr original\t");
+        Serial.print(ypr[0], OUTPUT_FLOAT_PRECISION);
+        Serial.print("\t");
+        Serial.print(ypr[1], OUTPUT_FLOAT_PRECISION);
+        Serial.print("\t");
+        Serial.println(ypr[2], OUTPUT_FLOAT_PRECISION);
+    }*/
+
+    // data to send
+    Serial.print("ypr\t");
+    Serial.print(ypr[0] * pi_m, OUTPUT_FLOAT_PRECISION);
+    Serial.print("\t");
+    Serial.print(ypr[1] * pi_m, OUTPUT_FLOAT_PRECISION);
+    Serial.print("\t");
+    Serial.println(ypr[2] * pi_m, OUTPUT_FLOAT_PRECISION);
+}
+
+void initializeMPU(int index) {
+    uint8_t devStatus;      // return status after each device operation (0 = success, !0 = error)
+    uint8_t mpuIntStatus;   // holds actual interrupt status byte from MPU
+    char tmp[50];
+    MPU6050 mpu = mpus[index];
+    dmpReady[index] = false;
+
+    mpu.initialize();
 
     // verify connection
     Serial.println(F("Testing device connections..."));
-    Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
+    sprintf(tmp, mpu.testConnection() ? "MPU6050[%d] connection successful" : "MPU6050[%d] connection failed", index);
+    Serial.println(tmp);
 
     // wait for ready
     Serial.println(F("\nSend any character to begin DMP programming and demo: "));
@@ -101,10 +194,10 @@ void setup() {
 
         // set our DMP Ready flag so the main loop() function knows it's okay to use it
         Serial.println(F("DMP ready!"));
-        dmpReady = true;
+        dmpReady[index] = true;
 
         // get expected DMP packet size for later comparison
-        packetSize = mpu.dmpGetFIFOPacketSize();
+        packetSize[index] = mpu.dmpGetFIFOPacketSize();
     } else {
         // ERROR!
         // 1 = initial memory load failed
@@ -114,32 +207,14 @@ void setup() {
         Serial.print(devStatus);
         Serial.println(F(")"));
     }
-
-    // configure LED for output
-    pinMode(LED_PIN, OUTPUT);
 }
 
-// ================================================================
-// ===                    MAIN PROGRAM LOOP                     ===
-// ================================================================
+void loopMPU (int index) {
+    if (!dmpReady[index]) return;  // if programming failed, don't try to do anything
 
-void loop() {
-
-    // button 3 states
-    button3CurrentState = (digitalRead(BUTTON_3_PIN) == HIGH ? 1 : 0);
-    if (button3CurrentState != button3LastState) {
-        Serial.print(F("BUTTON 3\t"));
-        Serial.println(button3CurrentState);
-    }
-    button3LastState = button3CurrentState;
-    // end button 3 states
-
-    // if programming failed, don't try to do anything
-    if (!dmpReady) return;
+    MPU6050 mpu = mpus[index];
 
     mpuIntStatus = mpu.getIntStatus();
-
-    // get current FIFO count
     fifoCount = mpu.getFIFOCount();
 
     // check for overflow (this should never happen unless our code is too inefficient)
@@ -151,10 +226,10 @@ void loop() {
     // otherwise, check for DMP data ready interrupt (this should happen frequently)
     } else if (mpuIntStatus & 0x02) {
         // wait for correct available data length, should be a VERY short wait
-        while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+        while (fifoCount < packetSize[index]) fifoCount = mpu.getFIFOCount();
 
         // read a packet from FIFO
-        mpu.getFIFOBytes(fifoBuffer, packetSize);
+        mpu.getFIFOBytes(fifoBuffer, packetSize[index]);
         // https://arduino.stackexchange.com/questions/10308/how-to-clear-fifo-buffer-on-mpu6050
         // To prevent overflow problems, please, go to MPU6050_6Axis_MotionApps20.h and modify that line:
         // 0x02,   0x16,   0x02,   0x00, **0x01**                // D_0_22 inv_set_fifo_rate
@@ -167,7 +242,7 @@ void loop() {
         // It is important to make sure the host processor can keep up with reading and processing
         // the FIFO output at the desired rate. Handling FIFO overflow cleanly is also a good idea.
         
-        fifoCount -= packetSize;
+        fifoCount -= packetSize[index];
 
         /*#ifdef OUTPUT_READABLE_QUATERNION
             // display quaternion values in easy matrix form: w x y z
@@ -239,69 +314,9 @@ void loop() {
         #endif*/
 
         #ifdef OUTPUT_READABLE_YAWPITCHROLL
-            output_readable_yawpitchroll();
+            output_readable_yawpitchroll(mpu);
         #endif
-        
-        // blink LED to indicate activity
-        blinkState = !blinkState;
-        digitalWrite(LED_PIN, blinkState);
     }
-}
-
-
-
-
-
-void output_readable_yawpitchroll() {
-    /*if (debugMode) {
-        int a = 0;
-        Serial.println("fifoBuffer:");
-        for(a=0;a<=64;a++) {
-            Serial.println(fifoBuffer[a]);
-        }
-        Serial.println("end fifoBuffer:");
-    }*/
-    
-    // display Euler angles in degrees
-    mpu.dmpGetQuaternion(&q, fifoBuffer);
-    /*if (debugMode) {
-        Serial.print("quat\t");
-        Serial.print(q.w, OUTPUT_FLOAT_PRECISION);
-        Serial.print("\t");
-        Serial.print(q.x, OUTPUT_FLOAT_PRECISION);
-        Serial.print("\t");
-        Serial.print(q.y, OUTPUT_FLOAT_PRECISION);
-        Serial.print("\t");
-        Serial.println(q.z, OUTPUT_FLOAT_PRECISION);
-    }*/
-    
-    mpu.dmpGetGravity(&gravity, &q);
-    /*if (debugMode) {
-        Serial.print("gravity\t");
-        Serial.print(gravity.x, OUTPUT_FLOAT_PRECISION);
-        Serial.print("\t");
-        Serial.print(gravity.y, OUTPUT_FLOAT_PRECISION);
-        Serial.print("\t");
-        Serial.println(gravity.z, OUTPUT_FLOAT_PRECISION);
-    }*/
-
-    mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-    /*if (debugMode) {
-        Serial.print("ypr original\t");
-        Serial.print(ypr[0], OUTPUT_FLOAT_PRECISION);
-        Serial.print("\t");
-        Serial.print(ypr[1], OUTPUT_FLOAT_PRECISION);
-        Serial.print("\t");
-        Serial.println(ypr[2], OUTPUT_FLOAT_PRECISION);
-    }*/
-
-    // data to send
-    Serial.print("ypr\t");
-    Serial.print(ypr[0] * pi_m, OUTPUT_FLOAT_PRECISION);
-    Serial.print("\t");
-    Serial.print(ypr[1] * pi_m, OUTPUT_FLOAT_PRECISION);
-    Serial.print("\t");
-    Serial.println(ypr[2] * pi_m, OUTPUT_FLOAT_PRECISION);
 }
 
 /*void serialEvent() {
