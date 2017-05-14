@@ -39,7 +39,7 @@ def startCapture(arduino, udp):
             if (args1.debug):
                 log_serial.write("{0}:{1}\n".format(ts, line))
 
-            if cols[0] == 'ypr' and len(cols) == 4:
+            if cols[0] == 'ypr#0' and len(cols) == 4:
                 y = str((float(cols[1])+180)).ljust(OUTPUT_FLOAT_PRECISION, '0')
                 p = str(float(cols[2])).ljust(OUTPUT_FLOAT_PRECISION, '0')
                 
@@ -53,7 +53,7 @@ def startCapture(arduino, udp):
                 print (sent_udp)
 
             # check for mouse clicks
-            elif cols[0] == 'BUTTON 3':
+            elif cols[0] == 'BUTTON#3':
                 if (cols[1] == '1'):
                     pyautogui.mouseDown(button='left')
                 else:
