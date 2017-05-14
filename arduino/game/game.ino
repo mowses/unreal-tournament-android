@@ -12,24 +12,24 @@
 //#define OUTPUT_TEAPOT
 
 #define OUTPUT_FLOAT_PRECISION 24
-#define INTERRUPT_PIN 2  // use pin 2 on Arduino Uno & most boards
-#define LED_PIN 13 // (Arduino is 13, Teensy is 11, Teensy++ is 6)
-#define BAUDRATE 115200  // baudrate value
-#define TOTAL_MPU6050 2  // number of MPU6050 sensors connected to arduino
+#define INTERRUPT_PIN 2             // use pin 2 on Arduino Uno & most boards
+#define LED_PIN 13                  // (Arduino is 13, Teensy is 11, Teensy++ is 6)
+#define BAUDRATE 115200             // baudrate value
+#define TOTAL_MPU6050 2             // number of MPU6050 sensors connected to arduino
 
 // bool debugMode = false;  // DEBUG MODE
 bool blinkState = false;
 
 // MPU control/status vars
-MPU6050 mpu0(0x68);
-MPU6050 mpu1(0x69);
+MPU6050 mpu0(0x68);  // ADO pin disconnected
+MPU6050 mpu1(0x69);  // ADO pin connected on 3.3v
 
 MPU6050 mpus[TOTAL_MPU6050];
 bool dmpReady[TOTAL_MPU6050];          // set true if DMP init was successful
 uint16_t packetSize[TOTAL_MPU6050];    // expected DMP packet size (default is 42 bytes)
-uint8_t fifoBuffer[64]; // FIFO storage buffer
-uint16_t fifoCount;     // count of all bytes currently in FIFO
-uint8_t mpuIntStatus;   // holds actual interrupt status byte from MPU
+uint8_t fifoBuffer[64];                // FIFO storage buffer
+uint16_t fifoCount;                    // count of all bytes currently in FIFO
+uint8_t mpuIntStatus;                  // holds actual interrupt status byte from MPU
 // orientation/motion vars
 Quaternion q;           // [w, x, y, z]         quaternion container
 VectorInt16 aa;         // [x, y, z]            accel sensor measurements
@@ -39,7 +39,7 @@ VectorFloat gravity;    // [x, y, z]            gravity vector
 float euler[3];         // [psi, theta, phi]    Euler angle container
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 float pi_m = 180/M_PI;
-uint8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\n' };
+//uint8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\n' };
 
 //String inputString = "";    // a string to hold incoming data
 
@@ -73,7 +73,6 @@ void setup() {
     // initialize push buttons
     initializeButton(3);
     //inputString.reserve(200);  // reserve X bytes for the inputString
-    Serial.println(F("foidepois do init button?"));  // remover. coloca pra ver q problema pode ser quando abro o serial monitor e so aparece a linha Initializing I2C devices...
     initializeMPU(0, mpu0);
     initializeMPU(1, mpu1);
 
@@ -92,8 +91,8 @@ void loop() {
     // end buttons state
 
 
-    //loopMPU(0);
-    //loopMPU(1);
+    loopMPU(0);
+    loopMPU(1);
 
     // blink LED to indicate activity
     blinkState = !blinkState;
@@ -155,6 +154,10 @@ void initializeMPU(int index, MPU6050 mpu) {
 
         // get expected DMP packet size for later comparison
         packetSize[index] = mpu.dmpGetFIFOPacketSize();
+
+        // reset FIFO
+        mpu.resetFIFO();
+
     } else {
         // ERROR!
         // 1 = initial memory load failed
@@ -171,9 +174,10 @@ void loopMPU (int index) {
 
     MPU6050 mpu = mpus[index];
 
-    mpuIntStatus = mpu.getIntStatus();
     fifoCount = mpu.getFIFOCount();
+    if (fifoCount < packetSize[index]) return;  // not a full packet available yet
     
+    mpuIntStatus = mpu.getIntStatus();
 
     // check for overflow (this should never happen unless our code is too inefficient)
     if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
@@ -185,10 +189,14 @@ void loopMPU (int index) {
     // otherwise, check for DMP data ready interrupt (this should happen frequently)
     } else if (mpuIntStatus & 0x02) {
         // wait for correct available data length, should be a VERY short wait
-        while (fifoCount < packetSize[index]) fifoCount = mpu.getFIFOCount();
+        //while (fifoCount < packetSize[index]) fifoCount = mpu.getFIFOCount();
+        while (fifoCount >= packetSize[index]) {  // read all packets 'till the end
 
-        // read a packet from FIFO
-        mpu.getFIFOBytes(fifoBuffer, packetSize[index]);
+            // read a packet from FIFO
+            mpu.getFIFOBytes(fifoBuffer, packetSize[index]);
+            fifoCount -= packetSize[index];
+        }
+        
         // https://arduino.stackexchange.com/questions/10308/how-to-clear-fifo-buffer-on-mpu6050
         // To prevent overflow problems, please, go to MPU6050_6Axis_MotionApps20.h and modify that line:
         // 0x02,   0x16,   0x02,   0x00, **0x01**                // D_0_22 inv_set_fifo_rate
@@ -201,7 +209,6 @@ void loopMPU (int index) {
         // It is important to make sure the host processor can keep up with reading and processing
         // the FIFO output at the desired rate. Handling FIFO overflow cleanly is also a good idea.
         
-        fifoCount -= packetSize[index];
 
         /*#ifdef OUTPUT_READABLE_QUATERNION
             // display quaternion values in easy matrix form: w x y z
@@ -323,7 +330,7 @@ void output_readable_yawpitchroll(int index) {
     }*/
 
     // data to send
-    Serial.print("ypr#");
+    Serial.print(F("ypr#"));
     Serial.print(index);
     Serial.print(F("\t"));
     Serial.print(ypr[0] * pi_m, OUTPUT_FLOAT_PRECISION);
