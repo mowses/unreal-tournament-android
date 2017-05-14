@@ -6,6 +6,7 @@ var Pawn LocalPlayer;
 var Bool AlreadyRunPostBeginPlay;
 var Float RuuAngle1;
 var HelloWorldUdp UdpComm;      // class member for UDP communication (UDP communication used to set the rotation of the player)
+var CustomFireWeapons CustomFireWeaponsVar;
 var int lastTS;
 
 function getPlayer()
@@ -36,7 +37,9 @@ function PostBeginPlay()
 	Super.PostBeginPlay(); // Run the super class function (Mutator.PostBeginPlay).
 	UdpComm = Spawn(class'HelloWorldUdp');   // Here we spawn our udp class
 	UdpComm.InitUdpLinkTracker();  // Here we initilalize the UDP connection
+	CustomFireWeaponsVar = Spawn(class'CustomFireWeapons');   // Here we spawn our CustomFireWeapons
 	SetTimer(1, True);
+	Super.PostBeginPlay();
 }
 
 //function SetInitialState()  // Called after PostBeginPlay to set the initial state of the actor.
@@ -57,13 +60,13 @@ function Tick(float DeltaTime)
 	lastTS = UdpComm.ts;
 	ChangeRotation(UdpComm.yaw, UdpComm.pitch, 0);
 	//LocalPlayer.ClientMessage("curr ts: "$UdpComm.ts);
-	//LocalPlayer.ClientMessage("curr orient: "$LocalPlayer.Rotation);
+	//LocalPlayer.ClientMessage("curr orient: "$LocalPlayer.ViewRotation);
 }
 
 function ChangeRotation(Float Yaw, Float Pitch, Float Roll)
 {
 	local Rotator newRot;
-	newRot = LocalPlayer.Rotation;
+	newRot = LocalPlayer.ViewRotation;
 	
 	newRot.Yaw = Yaw * RuuAngle1;
 	newRot.Pitch = Pitch * RuuAngle1;
