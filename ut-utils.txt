@@ -1,0 +1,128 @@
+https://www.gamefaqs.com/pc/191945-unreal-tournament-1999/cheats
+https://github.com/Slipyx/UT99/blob/a26a3359704873df5a24d0b241a32ca5fc36a8b7/Botpack/ut_biorifle.uc
+
+set enforcer FireOffset (Y=-10.000000,Z=-4.000000)
+set enforcer Rotation (Yaw=0,Pitch=0,Roll=0)
+set Botpack.enforcer Rotation (Yaw=0,Pitch=0,Roll=0)
+
+set Botpack.ut_biorifle FireOffset (X=0,Y=0,Z=0)
+set Botpack.ut_biorifle PlayerViewOffset (X=100,Y=0,Z=0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+https://github.com/Slipyx/UT99/blob/a26a3359704873df5a24d0b241a32ca5fc36a8b7/Botpack/DMMutator.uc
+if ( Other.IsA('Weapon') )
+	{
+		if ( Other.IsA('TournamentWeapon') )
+			return true;
+
+		log("Found "$Other$" at "$Other.location);
+		//Assert(false);
+		if ( Other.IsA('Stinger') )
+		{
+			ReplaceWith(Other, "Botpack.PulseGun");
+			return false; 
+		}
+		if ( Other.IsA('Rifle') )
+		{
+			ReplaceWith( Other, "Botpack.SniperRifle" );
+			return false;
+		}
+		if ( Other.IsA('Razorjack') )
+		{
+			ReplaceWith( Other, "Botpack.Ripper" );
+			return false;
+		}
+		if ( Other.IsA('Minigun') )
+		{
+			ReplaceWith( Other, "Botpack.Minigun2" );
+			return false;
+		}
+		if ( Other.IsA('AutoMag') )
+		{
+			ReplaceWith( Other, "Botpack.Enforcer" );
+			return false;
+		}
+		if ( Other.IsA('Eightball') )
+		{
+			ReplaceWith( Other, "Botpack.UT_Eightball" );
+			return false;
+		}
+		if ( Other.IsA('FlakCannon') )
+		{
+			ReplaceWith( Other, "Botpack.UT_FlakCannon" );
+			return false;
+		}
+		if ( Other.IsA('ASMD') )
+		{
+			ReplaceWith( Other, "Botpack.ShockRifle" );
+			return false;
+		}
+		if ( Other.IsA('GesBioRifle') )
+		{
+			ReplaceWith( Other, "Botpack.UT_BioRifle" );
+			return false;
+		}
+		if ( Other.IsA('DispersionPistol') )
+		{
+			ReplaceWith( Other, "Botpack.ImpactHammer");
+			return false;
+		}
+		bSuperRelevant = 0;
+		return true;
+	}
+
+
+
+
+
+
+
+
+
+function bool CheckReplacement(Actor Other, out byte bSuperRelevant)
+{
+	if ( Other.IsA('WarHeadLauncher') ) 
+		return false;
+	
+	LocalPlayer.ClientMessage("tem  qq coisa");
+
+	return true;
+}

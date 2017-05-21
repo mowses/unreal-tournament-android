@@ -2,14 +2,45 @@
 // https://wiki.beyondunreal.com/Legacy:Rotator
 class HelloWorld extends Mutator;
 
-var Pawn LocalPlayer;
-var Bool AlreadyRunPostBeginPlay;
-var Float RuuAngle1;
-var HelloWorldUdp UdpComm;      // class member for UDP communication (UDP communication used to set the rotation of the player)
-var CustomFireWeapons CustomFireWeaponsVar;
-var int lastTS;
+//var Pawn LocalPlayer;
+//var Bool AlreadyRunPostBeginPlay;
+//var Float RuuAngle1;
+//var HelloWorldUdp UdpComm;      // class member for UDP communication (UDP communication used to set the rotation of the player)
+//var CustomFireWeapons CustomFireWeaponsVar;
+//var int lastTS;
 
-function getPlayer()
+// Only allow one instance of this mutator.
+function AddMutator(Mutator M) {
+    if ( M != Self )
+        Super.AddMutator(M);
+}
+
+// Do not allow CustomFireWeapons to be replaced or removed.
+function bool AlwaysKeep(Actor Other) {
+    if( Other.IsA('CustomFireWeapons') )
+        return true;
+
+    return Super.AlwaysKeep(Other);
+}
+
+// Replace the default weapon with CustomFireWeapons when a player spawn.
+function ModifyPlayer(Pawn Other) {
+    DeathMatchPlus(Level.Game).GiveWeapon( Other, "CustomFireWeapons.CustomFireWeapons" );
+    Super.ModifyPlayer(Other);
+}
+
+// Replace SniperRifle with the FastRifle.
+function bool CheckReplacement(Actor Other, out byte bSuperRelevant) {
+    if ( Other.IsA('Weapon') ) {
+        if ( Other.IsA('SniperRifle') ) {
+            ReplaceWith( Other, "CustomFireWeapons.CustomFireWeapons" );
+            return false;
+        }
+    }
+    return true;
+}
+
+/*function getPlayer()
 {
 	local Pawn P;
 	
@@ -83,3 +114,23 @@ function Timer()
 	getPlayer();
 	SetTimer(999999, False);
 }
+
+
+function bool CheckReplacement(Actor Other, out byte bSuperRelevant)
+{
+	bSuperRelevant = 1;
+	if ( Other.IsA('Enforcer') ) {
+		ReplaceWith(Other, "Botpack.Enforcer");
+		return false;
+	}
+	
+	bSuperRelevant = 0;
+	return true;
+}
+
+// Replace the default weapon with FastRifle when a player spawn.
+function ModifyPlayer(Pawn Other)
+{
+    DeathMatchPlus(Level.Game).GiveWeapon( Other, "CustomFireWeapons.CustomFireWeapons" );
+    Super.ModifyPlayer(Other);
+}*/
