@@ -1,10 +1,17 @@
 Class HelloWorldUdp extends UdpLink;
 
 var int iPort;   // server port number
-var int ts;
-var Float yaw;
-var Float pitch;
-var Float roll;
+
+struct lastData
+{
+	var int lastTs;
+	var Float yaw;
+	var Float pitch;
+	var Float roll;
+};
+
+var lastData camera;
+var lastData weapon;
 
 function InitUdpLinkTracker()
 {
@@ -35,10 +42,36 @@ function InitUdpLinkTracker()
 
 event ReceivedText (IpAddr Addr, string Text)
 {
+	local string _type;
+	local int _ts;
+	local int _yaw;
+	local int _pitch;
+	local int _roll;
+
 	// we have just received a string !
-	ts = Int(Mid(Text, 0, 24));
-	yaw = Float(Mid(Text, 25, 24));
-	pitch = Float(Mid(Text, 50, 24));
+	_type = Mid(Text, 0, 6);
+	_ts = Int(Mid(Text, 7, 24));
+	_yaw = Float(Mid(Text, 32, 24));
+	_pitch = Float(Mid(Text, 57, 24));
+	_roll = Float(Mid(Text, 82, 24));
+
+	if (_type == "camera") {
+		if (_ts <= camera.lastTs)
+			return;
+
+		camera.lastTs = _ts;
+		camera.yaw = _yaw;
+		camera.pitch = _pitch;
+		camera.roll = _roll;
+	} else if (_type == "weapon") {
+		if (_ts <= weapon.lastTs)
+			return;
+
+		weapon.lastTs = _ts;
+		weapon.yaw = _yaw;
+		weapon.pitch = _pitch;
+		weapon.roll = _roll;
+	}
 
 	//log("udp: Read string: "$Text$" ts : "$ts$" yaw:"$yaw$"-pitch:"$pitch);
 }

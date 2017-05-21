@@ -6,13 +6,14 @@ var float RuuAngle1;  // Since 65536 = 0 = 360, half of that equals 180, right?;
 
 function PostBeginPlay()
 {
+	Super.PostBeginPlay();
+
 	if (AlreadyRunPostBeginPlay)
 		return;
 
 	AlreadyRunPostBeginPlay = True;
 	RuuAngle1 = 65536 / 360;
 	getPlayer();
-	Super.PostBeginPlay(); // Run the super class function (Mutator.PostBeginPlay).
 	
 }
 
@@ -28,23 +29,26 @@ simulated event RenderOverlays( canvas Canvas )
 	}
 
 	currRot = LocalPlayer.ViewRotation;
-	ChangeRotationDegrees(0,0,0);
+	//ChangeRotationDegrees(0,0,0);
 	Super.RenderOverlays(Canvas);
 	// restore orientation
 	LocalPlayer.ClientSetRotation(currRot);
 }
 
-state Idle
+function TraceFire(float Accuracy)
 {
-	function Fire( float Value )
-	{
-		FireWeapon(Value);
+	local Rotator currRot;
+	
+	if (LocalPlayer == None) {
+		Super.TraceFire(Accuracy);
+		return;
 	}
-}
 
-function Fire(float Value)
-{
-	FireWeapon(Value);
+	currRot = LocalPlayer.ViewRotation;
+	ChangeRotationDegrees(0,0,0);
+	Super.TraceFire(Accuracy);
+	// restore orientation
+	LocalPlayer.ClientSetRotation(currRot);
 }
 
 function ChangeRotationDegrees(Float Yaw, Float Pitch, Float Roll)
@@ -72,23 +76,6 @@ function getPlayer()
 
 	return;
 }
-
-function FireWeapon( float Value )
-{
-	local Rotator currRot;
-	
-	if (LocalPlayer == None) {
-		Super.Fire(Value);
-		return;
-	}
-
-	currRot = LocalPlayer.ViewRotation;
-	ChangeRotationDegrees(0,0,0);
-	Super.Fire(Value);
-	// restore orientation
-	LocalPlayer.ClientSetRotation(currRot);
-}
-
 
 defaultproperties
 {

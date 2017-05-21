@@ -42,8 +42,9 @@ def startCapture(arduino, udp):
             if cols[0] == 'ypr#0' and len(cols) == 4:
                 y = str((float(cols[1])+180)).ljust(OUTPUT_FLOAT_PRECISION, '0')
                 p = str(float(cols[2])).ljust(OUTPUT_FLOAT_PRECISION, '0')
+                r = str(float(cols[3])).ljust(OUTPUT_FLOAT_PRECISION, '0')
                 
-                sent_udp = "{0}:{1},{2}".format(ts, y, p)
+                sent_udp = "camera:{0}:{1},{2},{3}".format(ts, y, p, r)
                 udp.send(sent_udp.encode('ascii'))
 
                 # log to udp file
