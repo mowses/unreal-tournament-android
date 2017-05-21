@@ -19,6 +19,8 @@ def startCapture(arduino, udp):
 
     i = 0
     line = ''
+    ts = None;
+
     while True:
         try:
             # i think its better to use read() instead of readLine()

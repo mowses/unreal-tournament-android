@@ -3,6 +3,7 @@ class DecoupledEnforcer extends Enforcer;
 var Pawn LocalPlayer;
 var Bool AlreadyRunPostBeginPlay;
 var float RuuAngle1;  // Since 65536 = 0 = 360, half of that equals 180, right?;
+var HelloWorldUdp UdpComm;
 
 function PostBeginPlay()
 {
@@ -14,7 +15,7 @@ function PostBeginPlay()
 	AlreadyRunPostBeginPlay = True;
 	RuuAngle1 = 65536 / 360;
 	getPlayer();
-	
+	getUdp();
 }
 
 // Weapon rendering
@@ -29,7 +30,9 @@ simulated event RenderOverlays( canvas Canvas )
 	}
 
 	currRot = LocalPlayer.ViewRotation;
-	//ChangeRotationDegrees(0,0,0);
+	//LocalPlayer.ClientMessage("UdpComm.weapon.yaw:"$UdpComm.weapon.yaw);
+	//LocalPlayer.ClientMessage("UdpComm.camera.yaw:"$UdpComm.camera.yaw);
+	ChangeRotationDegrees(UdpComm.weapon.yaw, UdpComm.weapon.pitch, UdpComm.weapon.roll);
 	Super.RenderOverlays(Canvas);
 	// restore orientation
 	LocalPlayer.ClientSetRotation(currRot);
@@ -45,7 +48,7 @@ function TraceFire(float Accuracy)
 	}
 
 	currRot = LocalPlayer.ViewRotation;
-	ChangeRotationDegrees(0,0,0);
+	ChangeRotationDegrees(UdpComm.weapon.yaw, UdpComm.weapon.pitch, UdpComm.weapon.roll);
 	Super.TraceFire(Accuracy);
 	// restore orientation
 	LocalPlayer.ClientSetRotation(currRot);
@@ -75,6 +78,18 @@ function getPlayer()
 	}
 
 	return;
+}
+
+/**
+ * make this object get the UdpComm from master
+**/
+function getUdp()
+{
+	local HelloWorld HelloWorld;
+
+	foreach allactors( class'HelloWorld', HelloWorld) {
+		UdpComm = HelloWorld.UdpComm;
+	}
 }
 
 defaultproperties

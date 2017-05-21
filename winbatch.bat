@@ -2,10 +2,10 @@
 cls
 
 @echo ===================================
-@echo dont forget to add in your UnrealTournament/System/UnrealTournament.ini the following lines:
-@echo EditPackages=DecoupledEnforcer
+@echo dont forget to add in your UnrealTournament/System/UnrealTournament.ini the following lines in this exact order:
 @echo EditPackages=MutHelloWorldUdp
 @echo EditPackages=MutHelloWorld
+@echo EditPackages=DecoupledEnforcer
 @echo ===================================
 
 break>../UnrealTournament/System/UnrealTournament.log
