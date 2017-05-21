@@ -9,7 +9,10 @@ set Botpack.ut_biorifle FireOffset (X=0,Y=0,Z=0)
 set Botpack.ut_biorifle PlayerViewOffset (X=100,Y=0,Z=0)
 
 
-
+//=============================================================================
+// example got from a "WoD Quad-ShotGun."
+// http://wayback.archive.org/web/20010906213826/http://planetunreal.com:80/wod/tutorials/upgradables.html
+//=============================================================================
 
 
 

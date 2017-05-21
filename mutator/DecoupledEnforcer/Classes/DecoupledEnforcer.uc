@@ -1,8 +1,4 @@
-//=============================================================================
-// example got from a "WoD Quad-ShotGun."
-// http://wayback.archive.org/web/20010906213826/http://planetunreal.com:80/wod/tutorials/upgradables.html
-//=============================================================================
-class CustomFireWeapons extends SniperRifle;
+class DecoupledEnforcer extends Enforcer;
 
 var Pawn LocalPlayer;
 var Bool AlreadyRunPostBeginPlay;
@@ -42,19 +38,13 @@ state Idle
 {
 	function Fire( float Value )
 	{
-		local Rotator currRot;
-		
-		if (LocalPlayer == None) {
-			Super.Fire(Value);
-			return;
-		}
-	
-		currRot = LocalPlayer.ViewRotation;
-		ChangeRotationDegrees(0,0,0);
-		Super.Fire(Value);
-		// restore orientation
-		LocalPlayer.ClientSetRotation(currRot);
+		FireWeapon(Value);
 	}
+}
+
+function Fire(float Value)
+{
+	FireWeapon(Value);
 }
 
 function ChangeRotationDegrees(Float Yaw, Float Pitch, Float Roll)
@@ -81,4 +71,26 @@ function getPlayer()
 	}
 
 	return;
+}
+
+function FireWeapon( float Value )
+{
+	local Rotator currRot;
+	
+	if (LocalPlayer == None) {
+		Super.Fire(Value);
+		return;
+	}
+
+	currRot = LocalPlayer.ViewRotation;
+	ChangeRotationDegrees(0,0,0);
+	Super.Fire(Value);
+	// restore orientation
+	LocalPlayer.ClientSetRotation(currRot);
+}
+
+
+defaultproperties
+{
+	bDrawMuzzleFlash=False
 }

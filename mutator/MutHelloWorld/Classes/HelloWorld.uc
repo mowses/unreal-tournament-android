@@ -17,23 +17,23 @@ function AddMutator(Mutator M) {
 
 // Do not allow CustomFireWeapons to be replaced or removed.
 function bool AlwaysKeep(Actor Other) {
-    if( Other.IsA('CustomFireWeapons') )
+    if( Other.IsA('DecoupledEnforcer') )
         return true;
 
     return Super.AlwaysKeep(Other);
 }
 
-// Replace the default weapon with CustomFireWeapons when a player spawn.
+// Replace the default weapons by the decoupled ones
 function ModifyPlayer(Pawn Other) {
-    DeathMatchPlus(Level.Game).GiveWeapon( Other, "CustomFireWeapons.CustomFireWeapons" );
+    DeathMatchPlus(Level.Game).GiveWeapon( Other, "DecoupledEnforcer.DecoupledEnforcer" );
     Super.ModifyPlayer(Other);
 }
 
-// Replace SniperRifle with the FastRifle.
+// Replace weapons with the decoupled versions
 function bool CheckReplacement(Actor Other, out byte bSuperRelevant) {
     if ( Other.IsA('Weapon') ) {
-        if ( Other.IsA('SniperRifle') ) {
-            ReplaceWith( Other, "CustomFireWeapons.CustomFireWeapons" );
+        if ( Other.IsA('Enforcer') ) {
+            ReplaceWith( Other, "DecoupledEnforcer.DecoupledEnforcer" );
             return false;
         }
     }
