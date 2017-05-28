@@ -25,20 +25,25 @@ function bool AlwaysKeep(Actor Other) {
 
 // Replace the default weapons by the decoupled ones
 function ModifyPlayer(Pawn Other) {
-	local inventory inv;
 	local DeathMatchPlus DM;
-
+	local Inventory inv;
+	
 	DM = DeathMatchPlus(Level.Game);
 
-	/*if ( DM == None)
+	if ( DM == None) {
 		Super.ModifyPlayer(Other);
-		return;*/
+		return;
+	}
 
-	/*inv = Other.FindInventoryType(class'Enforcer');
-	if ( inv != None )
-		DM.GiveWeapon( Other, "DecoupledEnforcer.DecoupledEnforcer" );*/
+	/*// replace weapons from inventory (do not work if returns false from CheckReplacement)
+	inv = Other.FindInventoryType(class'Enforcer');
+	if (inv != None)
+	{
+		inv.DropInventory(); // Remove it from Player's Inventory
+		inv.Destroy(); // Remove it from the game
+		DM.GiveWeapon( Other, "DecoupledEnforcer.DecoupledEnforcer" );
+	}*/
 	
-	DM.GiveWeapon( Other, "DecoupledEnforcer.DecoupledEnforcer" );
 	Super.ModifyPlayer(Other);
 }
 
@@ -49,7 +54,7 @@ function bool CheckReplacement(Actor Other, out byte bSuperRelevant) {
 			ReplaceWith( Other, "DecoupledEnforcer.DecoupledEnforcer" );
 			return false;
 		}
-		if ( Other.IsA('ShockRifle') && !Other.IsA('DecoupledShockRifle') ) {
+		else if ( Other.IsA('ShockRifle') && !Other.IsA('DecoupledShockRifle') ) {
 			ReplaceWith( Other, "DecoupledShockRifle.DecoupledShockRifle" );
 			return false;
 		}
@@ -100,7 +105,7 @@ function Tick(float DeltaTime)
 	if (LocalPlayer == None)
 		return;
 
-	ChangeRotationDegrees(UdpComm.camera.yaw, UdpComm.camera.pitch, UdpComm.camera.roll);
+	//ChangeRotationDegrees(UdpComm.camera.yaw, UdpComm.camera.pitch, UdpComm.camera.roll);
 	//LocalPlayer.ClientMessage("curr orient: "$LocalPlayer.ViewRotation);
 }
 
