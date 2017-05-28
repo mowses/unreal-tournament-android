@@ -5,9 +5,9 @@ var int iPort;   // server port number
 struct lastData
 {
 	var int lastTs;
-	var Float yaw;
-	var Float pitch;
-	var Float roll;
+	var float yaw;
+	var float pitch;
+	var float roll;
 };
 
 var lastData camera;
@@ -44,9 +44,9 @@ event ReceivedText (IpAddr Addr, string Text)
 {
 	local string _type;
 	local int _ts;
-	local int _yaw;
-	local int _pitch;
-	local int _roll;
+	local float _yaw;
+	local float _pitch;
+	local float _roll;
 
 	// we have just received a string !
 	_type = Mid(Text, 0, 6);

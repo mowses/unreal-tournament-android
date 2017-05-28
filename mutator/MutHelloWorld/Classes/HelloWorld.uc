@@ -13,9 +13,11 @@ function AddMutator(Mutator M) {
 		Super.AddMutator(M);
 }
 
-// Do not allow CustomFireWeapons to be replaced or removed.
+// Do not allow our custom weapons to be replaced or removed.
 function bool AlwaysKeep(Actor Other) {
-	if( Other.IsA('DecoupledEnforcer') )
+	if( Other.IsA('DecoupledEnforcer') ||
+		Other.IsA('DecoupledShockRifle')
+	)
 		return true;
 
 	return Super.AlwaysKeep(Other);
@@ -23,15 +25,32 @@ function bool AlwaysKeep(Actor Other) {
 
 // Replace the default weapons by the decoupled ones
 function ModifyPlayer(Pawn Other) {
-	DeathMatchPlus(Level.Game).GiveWeapon( Other, "DecoupledEnforcer.DecoupledEnforcer" );
+	local inventory inv;
+	local DeathMatchPlus DM;
+
+	DM = DeathMatchPlus(Level.Game);
+
+	/*if ( DM == None)
+		Super.ModifyPlayer(Other);
+		return;*/
+
+	/*inv = Other.FindInventoryType(class'Enforcer');
+	if ( inv != None )
+		DM.GiveWeapon( Other, "DecoupledEnforcer.DecoupledEnforcer" );*/
+	
+	DM.GiveWeapon( Other, "DecoupledEnforcer.DecoupledEnforcer" );
 	Super.ModifyPlayer(Other);
 }
 
 // Replace weapons with the decoupled versions
 function bool CheckReplacement(Actor Other, out byte bSuperRelevant) {
 	if ( Other.IsA('Weapon') ) {
-		if ( Other.IsA('Enforcer') ) {
+		if ( Other.IsA('Enforcer') && !Other.IsA('DecoupledEnforcer') ) {
 			ReplaceWith( Other, "DecoupledEnforcer.DecoupledEnforcer" );
+			return false;
+		}
+		if ( Other.IsA('ShockRifle') && !Other.IsA('DecoupledShockRifle') ) {
+			ReplaceWith( Other, "DecoupledShockRifle.DecoupledShockRifle" );
 			return false;
 		}
 	}
@@ -81,22 +100,16 @@ function Tick(float DeltaTime)
 	if (LocalPlayer == None)
 		return;
 
-	ChangeRotation(UdpComm.camera.yaw, UdpComm.camera.pitch, UdpComm.camera.roll);
-	//LocalPlayer.ClientMessage("curr ts: "$UdpComm.camera.lastTs);
+	ChangeRotationDegrees(UdpComm.camera.yaw, UdpComm.camera.pitch, UdpComm.camera.roll);
 	//LocalPlayer.ClientMessage("curr orient: "$LocalPlayer.ViewRotation);
 }
 
-function ChangeRotation(Float Yaw, Float Pitch, Float Roll)
+function ChangeRotationDegrees(Float Yaw, Float Pitch, Float Roll)
 {
 	local Rotator newRot;
-
-	newRot = LocalPlayer.ViewRotation;
+	
 	newRot.Yaw = Yaw * RuuAngle1;
 	newRot.Pitch = Pitch * RuuAngle1;
 	newRot.Roll = Roll * RuuAngle1;
 	LocalPlayer.ClientSetRotation(newRot);
-	//Log("set rotation:yaw"$Yaw$"--pitch"$pitch);
-	
-	//LocalPlayer.SetRotation(newRot);
-	//Pawn(Player).SetRotation(newRot);
 }

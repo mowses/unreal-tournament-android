@@ -1,4 +1,4 @@
-class DecoupledEnforcer extends Enforcer;
+class DecoupledShockRifle extends ShockRifle;
 
 var HelloWorld Master;
 
