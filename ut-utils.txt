@@ -1,6 +1,10 @@
 https://www.gamefaqs.com/pc/191945-unreal-tournament-1999/cheats
 https://github.com/Slipyx/UT99/blob/a26a3359704873df5a24d0b241a32ca5fc36a8b7/Botpack/ut_biorifle.uc
 https://wiki.beyondunreal.com/Legacy:Writing_And_Using_An_Embedded_Mutator#Putting_It_All_Together
+https://wiki.beyondunreal.com/Legacy:CheckReplacement
+https://wiki.beyondunreal.com/Legacy:Mutator_(UT)
+https://github.com/CacoFFF/LCWeapons-UT99/blob/13beef1d37609675df0c57287df3430a52076957/classes/LCMutator.uc
+https://ut99.org/viewtopic.php?f=15&t=6763
 
 set enforcer FireOffset (Y=-10.000000,Z=-4.000000)
 set enforcer Rotation (Yaw=0,Pitch=0,Roll=0)

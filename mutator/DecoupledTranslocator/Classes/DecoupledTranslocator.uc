@@ -1,4 +1,4 @@
-class DecoupledShockRifle extends ShockRifle;
+class DecoupledTranslocator extends Translocator;
 
 var HelloWorld Master;
 
@@ -29,39 +29,21 @@ simulated event RenderOverlays( canvas Canvas )
 	Master.LocalPlayer.ClientSetRotation(currRot);
 }
 
-function TraceFire(float Accuracy)
+function ThrowTarget()
 {
 	local Rotator currRot;
 	
 	if (Master.LocalPlayer == None) {
-		Super.TraceFire(Accuracy);
+		Super.ThrowTarget();
 		return;
 	}
 
 	currRot = Master.LocalPlayer.ViewRotation;
 	Master.ChangeRotationDegrees(Master.UdpComm.weapon.yaw, Master.UdpComm.weapon.pitch, Master.UdpComm.weapon.roll);
-	Super.TraceFire(Accuracy);
+	Super.ThrowTarget();
 
 	// restore orientation
 	Master.LocalPlayer.ClientSetRotation(currRot);
-}
-
-function Projectile ProjectileFire (class<projectile> ProjClass, float ProjSpeed, bool bWarn)
-{
-	local Rotator currRot;
-	local Projectile projectile;
-	
-	if (Master.LocalPlayer == None) {
-		return Super.ProjectileFire(ProjClass, ProjSpeed, bWarn);
-	}
-
-	currRot = Master.LocalPlayer.ViewRotation;
-	Master.ChangeRotationDegrees(Master.UdpComm.weapon.yaw, Master.UdpComm.weapon.pitch, Master.UdpComm.weapon.roll);
-	projectile = Super.ProjectileFire(ProjClass, ProjSpeed, bWarn);
-
-	// restore orientation
-	Master.LocalPlayer.ClientSetRotation(currRot);
-	return projectile;
 }
 
 function getMaster()

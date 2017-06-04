@@ -1,4 +1,4 @@
-class DecoupledShockRifle extends ShockRifle;
+class DecoupledFlakCannon extends UT_FlakCannon;
 
 var HelloWorld Master;
 
@@ -29,39 +29,38 @@ simulated event RenderOverlays( canvas Canvas )
 	Master.LocalPlayer.ClientSetRotation(currRot);
 }
 
-function TraceFire(float Accuracy)
+function Fire(float Value)
 {
 	local Rotator currRot;
 	
 	if (Master.LocalPlayer == None) {
-		Super.TraceFire(Accuracy);
+		Super.Fire(Value);
 		return;
 	}
 
 	currRot = Master.LocalPlayer.ViewRotation;
 	Master.ChangeRotationDegrees(Master.UdpComm.weapon.yaw, Master.UdpComm.weapon.pitch, Master.UdpComm.weapon.roll);
-	Super.TraceFire(Accuracy);
+	Super.Fire(Value);
 
 	// restore orientation
 	Master.LocalPlayer.ClientSetRotation(currRot);
 }
 
-function Projectile ProjectileFire (class<projectile> ProjClass, float ProjSpeed, bool bWarn)
+function AltFire(float Value)
 {
 	local Rotator currRot;
-	local Projectile projectile;
 	
 	if (Master.LocalPlayer == None) {
-		return Super.ProjectileFire(ProjClass, ProjSpeed, bWarn);
+		Super.AltFire(Value);
+		return;
 	}
 
 	currRot = Master.LocalPlayer.ViewRotation;
 	Master.ChangeRotationDegrees(Master.UdpComm.weapon.yaw, Master.UdpComm.weapon.pitch, Master.UdpComm.weapon.roll);
-	projectile = Super.ProjectileFire(ProjClass, ProjSpeed, bWarn);
+	Super.AltFire(Value);
 
 	// restore orientation
 	Master.LocalPlayer.ClientSetRotation(currRot);
-	return projectile;
 }
 
 function getMaster()

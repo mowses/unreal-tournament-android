@@ -43,22 +43,81 @@ function ModifyPlayer(Pawn Other) {
 		inv.Destroy(); // Remove it from the game
 		DM.GiveWeapon( Other, "DecoupledEnforcer.DecoupledEnforcer" );
 	}*/
+
+	DM.GiveWeapon( Other, "DecoupledImpactHammer.DecoupledImpactHammer" );
+	DM.GiveWeapon( Other, "DecoupledTranslocator.DecoupledTranslocator" );
+	DM.GiveWeapon( Other, "DecoupledChainSaw.DecoupledChainSaw" );
+	DM.GiveWeapon( Other, "DecoupledEnforcer.DecoupledEnforcer" );
+	DM.GiveWeapon( Other, "DecoupledShockRifle.DecoupledShockRifle" );
+	DM.GiveWeapon( Other, "DecoupledFlakCannon.DecoupledFlakCannon" );
+	DM.GiveWeapon( Other, "DecoupledPulseGun.DecoupledPulseGun" );
+	DM.GiveWeapon( Other, "DecoupledMinigun2.DecoupledMinigun2" );
+	DM.GiveWeapon( Other, "DecoupledBioRifle.DecoupledBioRifle" );
+	DM.GiveWeapon( Other, "DecoupledRipper.DecoupledRipper" );
+	DM.GiveWeapon( Other, "DecoupledEightball.DecoupledEightball" );
+	DM.GiveWeapon( Other, "DecoupledSniperRifle.DecoupledSniperRifle" );
+	DM.GiveWeapon( Other, "DecoupledWarHeadLauncher.DecoupledWarHeadLauncher" );
 	
 	Super.ModifyPlayer(Other);
 }
 
 // Replace weapons with the decoupled versions
 function bool CheckReplacement(Actor Other, out byte bSuperRelevant) {
-	if ( Other.IsA('Weapon') ) {
-		if ( Other.IsA('Enforcer') && !Other.IsA('DecoupledEnforcer') ) {
-			ReplaceWith( Other, "DecoupledEnforcer.DecoupledEnforcer" );
+	if (Other.IsA('TournamentWeapon')) {
+		if (Other.Class == class'ImpactHammer') {
+			ReplaceWith(Other, "DecoupledImpactHammer.DecoupledImpactHammer");
 			return false;
 		}
-		else if ( Other.IsA('ShockRifle') && !Other.IsA('DecoupledShockRifle') ) {
-			ReplaceWith( Other, "DecoupledShockRifle.DecoupledShockRifle" );
+		else if (Other.Class == class'Translocator') {
+			ReplaceWith(Other, "DecoupledTranslocator.DecoupledTranslocator");
+			return false;
+		}
+		else if (Other.Class == class'ChainSaw') {
+			ReplaceWith(Other, "DecoupledChainSaw.DecoupledChainSaw");
+			return false;
+		}
+		else if (Other.Class == class'Enforcer') {
+			ReplaceWith(Other, "DecoupledEnforcer.DecoupledEnforcer");
+			return false;
+		}
+		else if (Other.Class == class'ShockRifle') {
+			ReplaceWith(Other, "DecoupledShockRifle.DecoupledShockRifle");
+			return false;
+		}
+		else if (Other.Class == class'UT_FlakCannon') {
+			ReplaceWith(Other, "DecoupledFlakCannon.DecoupledFlakCannon");
+			return false;
+		}
+		else if (Other.Class == class'PulseGun') {
+			ReplaceWith(Other, "DecoupledPulseGun.DecoupledPulseGun");
+			return false;
+		}
+		else if (Other.Class == class'Minigun2') {
+			ReplaceWith(Other, "DecoupledMinigun2.DecoupledMinigun2");
+			return false;
+		}
+		else if (Other.Class == class'UT_BioRifle') {
+			ReplaceWith(Other, "DecoupledBioRifle.DecoupledBioRifle");
+			return false;
+		}
+		else if (Other.Class == class'Ripper') {
+			ReplaceWith(Other, "DecoupledRipper.DecoupledRipper");
+			return false;
+		}
+		else if (Other.Class == class'UT_Eightball') {
+			ReplaceWith(Other, "DecoupledEightball.DecoupledEightball");
+			return false;
+		}
+		else if (Other.Class == class'SniperRifle') {
+			ReplaceWith(Other, "DecoupledSniperRifle.DecoupledSniperRifle");
+			return false;
+		}
+		else if (Other.Class == class'WarHeadLauncher') {
+			ReplaceWith(Other, "DecoupledWarHeadLauncher.DecoupledWarHeadLauncher");
 			return false;
 		}
 	}
+	
 	return true;
 }
 

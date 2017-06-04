@@ -1,4 +1,4 @@
-class DecoupledShockRifle extends ShockRifle;
+class DecoupledWarHeadLauncher extends WarHeadLauncher;
 
 var HelloWorld Master;
 
@@ -29,24 +29,7 @@ simulated event RenderOverlays( canvas Canvas )
 	Master.LocalPlayer.ClientSetRotation(currRot);
 }
 
-function TraceFire(float Accuracy)
-{
-	local Rotator currRot;
-	
-	if (Master.LocalPlayer == None) {
-		Super.TraceFire(Accuracy);
-		return;
-	}
-
-	currRot = Master.LocalPlayer.ViewRotation;
-	Master.ChangeRotationDegrees(Master.UdpComm.weapon.yaw, Master.UdpComm.weapon.pitch, Master.UdpComm.weapon.roll);
-	Super.TraceFire(Accuracy);
-
-	// restore orientation
-	Master.LocalPlayer.ClientSetRotation(currRot);
-}
-
-function Projectile ProjectileFire (class<projectile> ProjClass, float ProjSpeed, bool bWarn)
+function Projectile ProjectileFire(class<projectile> ProjClass, float ProjSpeed, bool bWarn)
 {
 	local Rotator currRot;
 	local Projectile projectile;
@@ -61,7 +44,27 @@ function Projectile ProjectileFire (class<projectile> ProjClass, float ProjSpeed
 
 	// restore orientation
 	Master.LocalPlayer.ClientSetRotation(currRot);
+
 	return projectile;
+}
+
+state Guiding
+{
+	simulated function Tick(float DeltaTime)
+	{
+		if (Master.LocalPlayer == None) {
+			Super.Tick(DeltaTime);
+			return;
+		}
+
+		if ( GuidedShell != None && !GuidedShell.bDestroyed) {
+			Master.ChangeRotationDegrees(Master.UdpComm.weapon.yaw, Master.UdpComm.weapon.pitch, Master.UdpComm.weapon.roll);
+		} else {
+			GotoState('Finishing');
+		}
+
+		Super.Tick(DeltaTime);
+	}
 }
 
 function getMaster()

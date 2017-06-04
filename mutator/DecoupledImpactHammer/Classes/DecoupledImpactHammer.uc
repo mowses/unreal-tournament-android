@@ -1,4 +1,4 @@
-class DecoupledShockRifle extends ShockRifle;
+class DecoupledImpactHammer extends ImpactHammer;
 
 var HelloWorld Master;
 
@@ -46,22 +46,21 @@ function TraceFire(float Accuracy)
 	Master.LocalPlayer.ClientSetRotation(currRot);
 }
 
-function Projectile ProjectileFire (class<projectile> ProjClass, float ProjSpeed, bool bWarn)
+function TraceAltFire()
 {
 	local Rotator currRot;
-	local Projectile projectile;
 	
 	if (Master.LocalPlayer == None) {
-		return Super.ProjectileFire(ProjClass, ProjSpeed, bWarn);
+		Super.TraceAltFire();
+		return;
 	}
 
 	currRot = Master.LocalPlayer.ViewRotation;
 	Master.ChangeRotationDegrees(Master.UdpComm.weapon.yaw, Master.UdpComm.weapon.pitch, Master.UdpComm.weapon.roll);
-	projectile = Super.ProjectileFire(ProjClass, ProjSpeed, bWarn);
+	Super.TraceAltFire();
 
 	// restore orientation
 	Master.LocalPlayer.ClientSetRotation(currRot);
-	return projectile;
 }
 
 function getMaster()

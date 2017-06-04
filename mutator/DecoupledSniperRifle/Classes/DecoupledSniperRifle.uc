@@ -1,4 +1,4 @@
-class DecoupledShockRifle extends ShockRifle;
+class DecoupledSniperRifle extends SniperRifle;
 
 var HelloWorld Master;
 
@@ -46,22 +46,42 @@ function TraceFire(float Accuracy)
 	Master.LocalPlayer.ClientSetRotation(currRot);
 }
 
-function Projectile ProjectileFire (class<projectile> ProjClass, float ProjSpeed, bool bWarn)
+state Zooming
 {
-	local Rotator currRot;
-	local Projectile projectile;
+	simulated function Tick(float DeltaTime)
+	{
+		local Rotator currRot;
 	
+		if (Master.LocalPlayer == None) {
+			Super.Tick(DeltaTime);
+			return;
+		}
+
+		currRot = Master.LocalPlayer.ViewRotation;
+		Master.ChangeRotationDegrees(Master.UdpComm.weapon.yaw, Master.UdpComm.weapon.pitch, Master.UdpComm.weapon.roll);
+		Super.Tick(DeltaTime);
+
+		// DO NOT restore orientation
+		// since zooming should be at weapon orientation
+	}
+}
+
+simulated function Tick(float DeltaTime)
+{
+	local PlayerPawn P;
+
 	if (Master.LocalPlayer == None) {
-		return Super.ProjectileFire(ProjClass, ProjSpeed, bWarn);
+		Super.Tick(DeltaTime);
+		return;
 	}
 
-	currRot = Master.LocalPlayer.ViewRotation;
-	Master.ChangeRotationDegrees(Master.UdpComm.weapon.yaw, Master.UdpComm.weapon.pitch, Master.UdpComm.weapon.roll);
-	projectile = Super.ProjectileFire(ProjClass, ProjSpeed, bWarn);
+	P = PlayerPawn(Owner);
+	// player is using the sniper zoom
+	if ((P != None) && (P.DesiredFOV != P.DefaultFOV) ) {
+		Master.ChangeRotationDegrees(Master.UdpComm.weapon.yaw, Master.UdpComm.weapon.pitch, Master.UdpComm.weapon.roll);
+	}
 
-	// restore orientation
-	Master.LocalPlayer.ClientSetRotation(currRot);
-	return projectile;
+	Super.Tick(DeltaTime);
 }
 
 function getMaster()
