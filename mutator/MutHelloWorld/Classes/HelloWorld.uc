@@ -25,38 +25,27 @@ function bool AlwaysKeep(Actor Other) {
 
 // Replace the default weapons by the decoupled ones
 function ModifyPlayer(Pawn Other) {
-	local DeathMatchPlus DM;
-	local Inventory inv;
 	
-	DM = DeathMatchPlus(Level.Game);
-
-	if ( DM == None) {
+	if ( LocalPlayer == None) {
 		Super.ModifyPlayer(Other);
 		return;
 	}
 
-	/*// replace weapons from inventory (do not work if returns false from CheckReplacement)
-	inv = Other.FindInventoryType(class'Enforcer');
-	if (inv != None)
-	{
-		inv.DropInventory(); // Remove it from Player's Inventory
-		inv.Destroy(); // Remove it from the game
-		DM.GiveWeapon( Other, "DecoupledEnforcer.DecoupledEnforcer" );
-	}*/
-
-	DM.GiveWeapon( Other, "DecoupledImpactHammer.DecoupledImpactHammer" );
-	DM.GiveWeapon( Other, "DecoupledTranslocator.DecoupledTranslocator" );
-	DM.GiveWeapon( Other, "DecoupledChainSaw.DecoupledChainSaw" );
-	DM.GiveWeapon( Other, "DecoupledEnforcer.DecoupledEnforcer" );
-	DM.GiveWeapon( Other, "DecoupledShockRifle.DecoupledShockRifle" );
-	DM.GiveWeapon( Other, "DecoupledFlakCannon.DecoupledFlakCannon" );
-	DM.GiveWeapon( Other, "DecoupledPulseGun.DecoupledPulseGun" );
-	DM.GiveWeapon( Other, "DecoupledMinigun2.DecoupledMinigun2" );
-	DM.GiveWeapon( Other, "DecoupledBioRifle.DecoupledBioRifle" );
-	DM.GiveWeapon( Other, "DecoupledRipper.DecoupledRipper" );
-	DM.GiveWeapon( Other, "DecoupledEightball.DecoupledEightball" );
-	DM.GiveWeapon( Other, "DecoupledSniperRifle.DecoupledSniperRifle" );
-	DM.GiveWeapon( Other, "DecoupledWarHeadLauncher.DecoupledWarHeadLauncher" );
+	// replace weapons from inventory (do not work if returns false from CheckReplacement)
+	replaceWeaponInInventory(class'ImpactHammer', "DecoupledImpactHammer.DecoupledImpactHammer", Other);
+	replaceWeaponInInventory(class'ChainSaw', "DecoupledChainSaw.DecoupledChainSaw", Other);
+	replaceWeaponInInventory(class'Translocator', "DecoupledTranslocator.DecoupledTranslocator", Other);
+	replaceWeaponInInventory(class'Enforcer', "DecoupledEnforcer.DecoupledEnforcer", Other);
+	replaceWeaponInInventory(class'ShockRifle', "DecoupledShockRifle.DecoupledShockRifle", Other);
+	replaceWeaponInInventory(class'SuperShockRifle', "DecoupledSuperShockRifle.DecoupledSuperShockRifle", Other);
+	replaceWeaponInInventory(class'UT_FlakCannon', "DecoupledFlakCannon.DecoupledFlakCannon", Other);
+	replaceWeaponInInventory(class'PulseGun', "DecoupledPulseGun.DecoupledPulseGun", Other);
+	replaceWeaponInInventory(class'Minigun2', "DecoupledMinigun2.DecoupledMinigun2", Other);
+	replaceWeaponInInventory(class'UT_BioRifle', "DecoupledBioRifle.DecoupledBioRifle", Other);
+	replaceWeaponInInventory(class'Ripper', "DecoupledRipper.DecoupledRipper", Other);
+	replaceWeaponInInventory(class'UT_Eightball', "DecoupledEightball.DecoupledEightball", Other);
+	replaceWeaponInInventory(class'SniperRifle', "DecoupledSniperRifle.DecoupledSniperRifle", Other);
+	replaceWeaponInInventory(class'WarHeadLauncher', "DecoupledWarHeadLauncher.DecoupledWarHeadLauncher", Other);
 	
 	Super.ModifyPlayer(Other);
 }
@@ -82,6 +71,10 @@ function bool CheckReplacement(Actor Other, out byte bSuperRelevant) {
 		}
 		else if (Other.Class == class'ShockRifle') {
 			ReplaceWith(Other, "DecoupledShockRifle.DecoupledShockRifle");
+			return false;
+		}
+		else if (Other.Class == class'SuperShockRifle') {
+			ReplaceWith(Other, "DecoupledSuperShockRifle.DecoupledSuperShockRifle");
 			return false;
 		}
 		else if (Other.Class == class'UT_FlakCannon') {
@@ -117,7 +110,7 @@ function bool CheckReplacement(Actor Other, out byte bSuperRelevant) {
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
@@ -143,6 +136,28 @@ function Timer()
 	SetTimer(999999, False);
 }
 
+function Tick(float DeltaTime)
+{
+	if (LocalPlayer == None) {
+		Super.Tick(DeltaTime);
+		return;
+	}
+
+	//ChangeRotationDegrees(UdpComm.camera.yaw, UdpComm.camera.pitch, UdpComm.camera.roll);
+	//LocalPlayer.ClientMessage("curr orient: "$LocalPlayer.ViewRotation);
+	Super.Tick(DeltaTime);
+}
+
+function ChangeRotationDegrees(Float Yaw, Float Pitch, Float Roll)
+{
+	local Rotator newRot;
+	
+	newRot.Yaw = Yaw * RuuAngle1;
+	newRot.Pitch = Pitch * RuuAngle1;
+	newRot.Roll = Roll * RuuAngle1;
+	LocalPlayer.ClientSetRotation(newRot);
+}
+
 function getPlayer()
 {
 	local Pawn P;
@@ -159,21 +174,23 @@ function getPlayer()
 	return;
 }
 
-function Tick(float DeltaTime)
-{
-	if (LocalPlayer == None)
-		return;
+function bool replaceWeaponInInventory(class<Weapon> weapon, string newWeapon, Pawn Other) {
+	local DeathMatchPlus DM;
+	local Inventory inv;
 
-	//ChangeRotationDegrees(UdpComm.camera.yaw, UdpComm.camera.pitch, UdpComm.camera.roll);
-	//LocalPlayer.ClientMessage("curr orient: "$LocalPlayer.ViewRotation);
-}
+	DM = DeathMatchPlus(Level.Game);
 
-function ChangeRotationDegrees(Float Yaw, Float Pitch, Float Roll)
-{
-	local Rotator newRot;
-	
-	newRot.Yaw = Yaw * RuuAngle1;
-	newRot.Pitch = Pitch * RuuAngle1;
-	newRot.Roll = Roll * RuuAngle1;
-	LocalPlayer.ClientSetRotation(newRot);
+	if (Other == None || DM == None)
+		return false;
+
+	inv = Other.FindInventoryType(weapon);
+	if (inv != None)
+	{
+		inv.DropInventory(); // Remove it from Player's Inventory
+		inv.Destroy(); // Remove it from the game
+		DM.GiveWeapon(Other, newWeapon);
+		return true;
+	}
+
+	return false;
 }

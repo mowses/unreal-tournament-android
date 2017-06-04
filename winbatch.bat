@@ -8,6 +8,7 @@ cls
 @echo EditPackages=DecoupledStarterBolt
 @echo EditPackages=DecoupledEnforcer
 @echo EditPackages=DecoupledShockRifle
+@echo EditPackages=DecoupledSuperShockRifle
 @echo EditPackages=DecoupledFlakCannon
 @echo EditPackages=DecoupledMinigun2
 @echo EditPackages=DecoupledBioRifle
@@ -25,6 +26,7 @@ break>../UnrealTournament/System/UnrealTournament.log
 del ..\UnrealTournament\System\MutHelloWorld.u
 del ..\UnrealTournament\System\DecoupledEnforcer.u
 del ..\UnrealTournament\System\DecoupledShockRifle.u
+del ..\UnrealTournament\System\DecoupledSuperShockRifle.u
 del ..\UnrealTournament\System\DecoupledFlakCannon.u
 del ..\UnrealTournament\System\DecoupledMinigun2.u
 del ..\UnrealTournament\System\DecoupledBioRifle.u
@@ -42,6 +44,7 @@ del ..\UnrealTournament\System\MutHelloWorldUdp.u
 rmdir ..\UnrealTournament\MutHelloWorld /s/q
 rmdir ..\UnrealTournament\DecoupledEnforcer /s/q
 rmdir ..\UnrealTournament\DecoupledShockRifle /s/q
+rmdir ..\UnrealTournament\DecoupledSuperShockRifle /s/q
 rmdir ..\UnrealTournament\DecoupledFlakCannon /s/q
 rmdir ..\UnrealTournament\DecoupledMinigun2 /s/q
 rmdir ..\UnrealTournament\DecoupledBioRifle /s/q
@@ -59,6 +62,7 @@ rmdir ..\UnrealTournament\MutHelloWorldUdp /s/q
 xcopy mutator\MutHelloWorld ..\UnrealTournament\MutHelloWorld /e/h/k/c/i
 xcopy mutator\DecoupledEnforcer ..\UnrealTournament\DecoupledEnforcer /e/h/k/c/i
 xcopy mutator\DecoupledShockRifle ..\UnrealTournament\DecoupledShockRifle /e/h/k/c/i
+xcopy mutator\DecoupledSuperShockRifle ..\UnrealTournament\DecoupledSuperShockRifle /e/h/k/c/i
 xcopy mutator\DecoupledFlakCannon ..\UnrealTournament\DecoupledFlakCannon /e/h/k/c/i
 xcopy mutator\DecoupledMinigun2 ..\UnrealTournament\DecoupledMinigun2 /e/h/k/c/i
 xcopy mutator\DecoupledBioRifle ..\UnrealTournament\DecoupledBioRifle /e/h/k/c/i
