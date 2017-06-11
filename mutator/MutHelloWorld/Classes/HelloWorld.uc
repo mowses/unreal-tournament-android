@@ -143,7 +143,7 @@ function Tick(float DeltaTime)
 		return;
 	}
 
-	//ChangeRotationDegrees(UdpComm.camera.yaw, UdpComm.camera.pitch, UdpComm.camera.roll);
+	ChangeRotationDegrees(UdpComm.camera.yaw, UdpComm.camera.pitch, UdpComm.camera.roll);
 	//LocalPlayer.ClientMessage("curr orient: "$LocalPlayer.ViewRotation);
 	Super.Tick(DeltaTime);
 }
