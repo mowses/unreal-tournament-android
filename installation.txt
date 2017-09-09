@@ -10,3 +10,7 @@ LATEST UPDATE: 22 APR 2017
 	- plug your MPU6050 sensor with arduino in your PC USB;
 	- run python serial-capture.py -i [machine ip where UT is running] -b 115200 -s COM3 (note: to know your port run the command: python -m serial.tools.list_ports)
 	- start a new match and just add the "HelloWorld" mutator under the mutator list;
+
+
+INSTALL ARDUINO LIBRARY:
+- Just copy both folders "MPU6050" and "I2Cdev" in your arduino libraries folder (in ubuntu is located at /home/[user]/Arduino/libraries). Then close/restart your arduino IDE then you are able to build.

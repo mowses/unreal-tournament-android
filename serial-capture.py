@@ -77,6 +77,22 @@ def startCapture(arduino, udp):
                     pyautogui.mouseUp(button='left')
 
                 print('{0} {1}'.format(cols[0], cols[1]))
+
+            # elif cols[0] == 'BUTTON#4':
+            #     if (cols[1] == '1'):
+            #         pyautogui.mouseDown(button='middle')
+            #     else:
+            #         pyautogui.mouseUp(button='middle')
+
+            #     print('{0} {1}'.format(cols[0], cols[1]))
+
+            elif cols[0] == 'BUTTON#5':
+                if (cols[1] == '1'):
+                    pyautogui.mouseDown(button='right')
+                else:
+                    pyautogui.mouseUp(button='right')
+
+                print('{0} {1}'.format(cols[0], cols[1]))
             
             line = ''
 

@@ -72,6 +72,8 @@ void setup() {
 
     // initialize push buttons
     initializeButton(3);
+    initializeButton(4);
+    initializeButton(5);
     //inputString.reserve(200);  // reserve X bytes for the inputString
     initializeMPU(0, mpu0);
     initializeMPU(1, mpu1);
@@ -88,6 +90,8 @@ void loop() {
 
     // buttons state
     loopButton(3);
+    loopButton(4);
+    loopButton(5);
     // end buttons state
 
 
